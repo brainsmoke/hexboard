@@ -116,15 +116,10 @@ func (r *RippleCursor) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 		for i, d := range r.ripples[j].cache.d {
 			if c > d && c < d+30 {
 				x := float64(.05)
-//				x := float64(.05)
 				if c > d+2 && c < d+5 {
 					x = float64(.15)
-//					x = float64(.15)
 				}
-	//			if x > f.frame[i] {
-	//				f.frame[i] = x
-					f.frame[i] += x
-	//			}
+				f.frame[i] += x
 			}
 		}
 	}
