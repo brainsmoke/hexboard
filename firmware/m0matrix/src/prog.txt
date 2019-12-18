@@ -1,0 +1,216 @@
+#            A  B  C  D  E  F G1 G2  H  J  K  L  M  N Dp  ?
+char_map = [ 3, 2,14, 9,15, 0, 4, 8, 1, 5, 6,11,12,13,10, 7 ]
+
+mapping = [ None ] * 32*16
+rev_map = [ None ] * 32*16
+
+order = 0
+
+for row in range(4):
+	for north,south in ( (0x00,0x1C), (0x04,0x18), (0x08,0x14), (0x0C,0x10) ):
+		for i in range(16-1, -1, -1):
+			mapping[order] = (north+row)*16+char_map.index(i) # which one do we need to send now
+			mapping[order+1] = (south+row)*16+char_map.index(i)
+			order += 2
+
+rev_map = [ mapping.index(i) for i in range(32*16) ]
+
+#print ( [ hex(x) for x in mapping ] )
+
+print ( 'const uint16_t rev_map[512] = { '+ ', '.join( hex(x) for x in rev_map ) + ' };' )
+
+rev_map2 = []
+char_map = [ 3, 2,14, 9,15, 0, 4, 8, 1, 5, 6,11,12,13,10, 7 ]
+
+for c in range(16):
+	row = c&3
+	ix = c>>2
+	char_off = (row*4+ix)*2*16
+	for segment in range(16):
+		#getchar()
+		rev_map2.append(char_off+(15-char_map[segment])*2)
+
+for c in range(16):
+	row = c&3
+	ix = 3 - (c>>2)
+	char_off = (row*4+ix)*2*16+1
+	for segment in range(16):
+		#getchar()
+		rev_map2.append(char_off+(15-char_map[segment])*2)
+
+
+rev_map3 = []
+#char_map3 = [ (15-x)*2 for x in char_map ]
+char_map3 = [24, 26, 2, 12, 0, 30, 22, 14, 28, 20, 18, 8, 6, 4, 10, 16]
+
+char_off = 352
+rowd = -480
+for i in range(512):
+	seg = i&15
+	if seg == 0:
+		char_off += 128
+		if i&63 == 0:
+			char_off += rowd
+			if i == 256:
+				char_off = 97
+				rowd -= 64
+	rev_map3.append(char_off+char_map3[seg])
+
+print (rev_map2 == rev_map3)
+print (rev_map == rev_map2)
+
+  pos    'row' line push order
+
+[ 00 01 ] 0 1  north 0
+[ 02 03 ] 2 3  north 1
+[ 04 05 ] 0 1  north 2
+[ 06 07 ] 2 3  north 3
+[ 08 09 ] 0 1  north 4
+[ 0A 0B ] 2 3  north 5
+[ 0C 0D ] 0 1  north 6
+[ 0E 0F ] 2 3  north 7
+[ 10 11 ] 0 1  south 7
+[ 12 13 ] 2 3  south 6
+[ 14 15 ] 0 1  south 5
+[ 16 17 ] 2 3  south 4
+[ 18 19 ] 0 1  south 3
+[ 1A 1B ] 2 3  south 2
+[ 1C 1D ] 0 1  south 1
+[ 1E 1F ] 2 3  south 0
+
+
+0C 08 04 00 / 10 14 18 1C
+
+ 0 4 8 C 10 /
+
+
+[ 
+
+
+
+setup:
+
+DISABLE DRIVER
+DISABLE MOSFET
+
+clock_line = 0
+display_line = N-1
+
+read 
+
+
+
+
+
+1st iter:
+
+2 ld [A 0 B 0] framebuf
+2 ld [r 0 r 0] red
+1 mov rout, rbkup
+1 add red <- framebuf
+1 adc rout, 0
+1 tst r[0 1 0 0], red
+3 bnz 1f
+  add rout, 16
+  bic red <- r[0 1 0 0]
+  1:
+2 st red
+2 st gpio
+2 st gpio
+1 add 8 p
+
+
+2nd iter:
+
+lo regs: rP, rFramebuf/rX, rDith, rOut, rBitclear[10000000100000001000000010000000], rMinus4
+hi regs: rBitsetShifted
+
+
+loop:
+  0  + 3 ldm rP! {rFramebuf, rDith} [ 0aaaaaaa0bbbbbbb0ccccccc0dddddddd, ]
+  3  + 1 mov rOut, rBitsetShifted                                       
+  4  + 1 adds rDith, rFramebuf
+  5  + 1 lsls rX, rDith, #1
+  6  + 1 adcs rOut, rOut
+  7  + 1 lsls rOut, rOut, #4
+  8  + 1 lsls rX, rX, #8
+  9  + 1 adcs rOut, rOut
+
+##
+ 10  + 2 st gpiobsrr , rout
+ 12  + 2 st gpiobsrr , clk                               lo usage = 6
+##
+ 
+ 14  + 1 mov rOut, rBitsetShifted                                       
+ 15  + 1 lsls rX, rDith, #8
+ 16  + 1 adcs rOut, rOut
+ 17  + 1 lsls rOut, rOut, #4
+ 18  + 1 lsls rX, rX, #8
+ 19  + 1 adcs rOut, rOut
+
+ 20  + 1 bics rDith, rBitclear
+ 21  + 2 st rP[rminus4], red
+
+##
+ 23  + 2 st gpiobsrr , rout
+ 25  + 2 st gpiobsrr , clk                               lo usage = 6
+##
+ 26  + 1 cmp rP, rEnd
+ 29  + 3 blt loop:
+
+
+3rd iter:
+
+      ldm rP!, {rOut}
+loop:
+0 + 2 strh [rGPIO_ODR], rOut
+2 + 2 ldm rP!, {rOut}
+4 + 1 cmp rPi, rEnd
+5 + 2 str [rGPIO_BSRR], rClk
+7 + 3 bne loop
+
+4th
+
+      ldm rP!, {rOut}
+      strh [rGPIO_ODR], rOut
+      nop
+      nop
+loop:
+ 0 + 2 str [rGPIO_BSRR], rClk
+ 2 + 1 lsrs rOutA, #16
+ 3 + 2 strh [rGPIO_ODR], rOut
+ 5 + 2 ldm rP!, {rOut}
+ 7 + 2 str [rGPIO_BSRR], rClk
+ 9 + 1 cmp rPi, rEnd
+10 + 2 strh [rGPIO_ODR], rOut
+12 + 3 bne loop
+loopend:
+       str [rGPIO_BSRR], rClk
+       lsrs rOutA, #16
+       strh [rGPIO_ODR], rOut
+       nop
+       nop
+       str [rGPIO_BSRR], rClk
+
+
+5th
+
+      ldm rP!, {rOut}
+      strb [rGPIO_ODR], rOut
+       lsrs rOutA, #8
+loop:
+ 0 + 2 str [rGPIO_BSRR], rClk
+ 2 + 2 strb [rGPIO_ODR], rOut
+ 4 + 1 lsrs rOutA, #8
+ 5 + 2 str [rGPIO_BSRR], rClk
+ 7 + 2 strb [rGPIO_ODR], rOut
+ 9 + 1 lsrs rOutA, #8
+10 + 1 cmp rP, rLastWord
+11 + 2 str [rGPIO_BSRR], rClk
+13 + 2 strb [rGPIO_ODR], rOut
+15 + 2 ldm rP!, {rOut}
+17 + 2 str [rGPIO_BSRR], rClk
+19 + 2 strb [rGPIO_ODR], rOut
+21 + 3 bne loop
+
+
