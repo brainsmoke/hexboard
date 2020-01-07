@@ -50,6 +50,7 @@ type ScreenInfo struct {
 	Height, Width float64   // in mm
 	Digits []DigitInfo
 	Segments []SegmentInfo
+	indices []int
 }
 
 var usedColumns = []int{
@@ -68,6 +69,11 @@ func GetScreenInfo() *ScreenInfo {
 	width  := float64(columns) * digitSize.X
 	digits   := make([]DigitInfo, size)
 	segments := make([]SegmentInfo, size*16)
+	indices := make([]int, rows*columns)
+
+	for i := range indices {
+		indices[i] = -1
+	}
 
 	ix := 0
 
@@ -75,6 +81,7 @@ func GetScreenInfo() *ScreenInfo {
 
 		digits[ix].Column = ix
 		digits[ix].Row = 0
+		indices[ix] = ix
 		ix++
 	}
 
@@ -85,6 +92,7 @@ func GetScreenInfo() *ScreenInfo {
 
 			digits[ix].Column = column
 			digits[ix].Row = row
+			indices[row*columns + column] = ix
 			ix++
 		}
 	}
@@ -112,9 +120,17 @@ func GetScreenInfo() *ScreenInfo {
 		Width: width, Height: height,
 		Digits: digits,
 		Segments: segments,
+		indices: indices,
 	}
 }
 
+
+func (s *ScreenInfo) GetIndex(column, row int) int {
+	if row < 0 || row >= s.Rows || column < 0 || column >= s.Columns {
+		return -1
+	}
+	return s.indices[row*s.Columns + column]
+}
 
 var screenInfo *ScreenInfo
 

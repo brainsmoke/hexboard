@@ -17,18 +17,22 @@ type HexScreen interface {
 	Font() *font.Font
 
 	SetStyle(s Style)
+	SetStyleAt(s Style, column, row int)
 	SetStyleAtIndex(s Style, index int)
 
 	SetDigit(g font.Glyph, s Style, index int)
 
+	WriteRawAt(g []font.Glyph, column, row int)
 	WriteRawAtIndex(g []font.Glyph, index int)
+
+	WriteAt(s string, column, row int)
+	WriteAtIndex(s string, index int)
 
 	WriteRawTitle(g []font.Glyph, start int)
 	WriteRawHexField(g []font.Glyph, field int)
 	WriteRawAsciiField(g font.Glyph, field int)
 	WriteRawOffset(g []font.Glyph, line int)
 
-	WriteAtIndex(s string, index int)
 
 	WriteTitle(s string, start int)
 	WriteHexField(s string, field int)
@@ -110,6 +114,13 @@ func (t *hexScreen) SetStyle(s Style) {
 	t.style = s
 }
 
+func (t *hexScreen) SetStyleAt(s Style, column, row int) {
+	index := screenInfo.GetIndex(column, row)
+	if index != -1 {
+		t.SetStyleAtIndex(s, index)
+	}
+}
+
 func (t *hexScreen) SetStyleAtIndex(s Style, index int) {
 	if index >= 0 && index < 960 {
 		t.staging[index].style = s.Apply()
@@ -125,6 +136,12 @@ func (t *hexScreen) SetDigit(g font.Glyph, s Style, index int) {
 	t.tryUpdate()
 }
 
+func (t *hexScreen) WriteRawAt(g []font.Glyph, column, row int) {
+	index := screenInfo.GetIndex(column, row)
+	if index != -1 {
+		t.WriteRawAtIndex(g, index)
+	}
+}
 
 func (t *hexScreen) WriteRawAtIndex(g []font.Glyph, index int) {
 	s := t.style.Apply()
@@ -165,6 +182,13 @@ func (t *hexScreen) WriteRawOffset(g []font.Glyph, line int) {
 	t.WriteRawAtIndex(offsetdigits, index)
 }
 
+
+func (t *hexScreen) WriteAt(s string, column, row int) {
+	index := screenInfo.GetIndex(column, row)
+	if index != -1 {
+		t.WriteAtIndex(s, index)
+	}
+}
 
 func (t *hexScreen) WriteAtIndex(s string, index int) {
 	t.WriteRawAtIndex(t.font.Glyphs(s), index)

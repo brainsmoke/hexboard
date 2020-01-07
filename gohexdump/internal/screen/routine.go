@@ -38,6 +38,7 @@ func DisplayRoutine(out Output, s Screen, quit <-chan bool) {
 				out.Write(frames[cur].frame)
 				cur, old = old, cur
 				counter++
+				frames[cur].Clear()
 				if !s.NextFrame(frames[cur], frames[old], counter) {
 					return
 				}

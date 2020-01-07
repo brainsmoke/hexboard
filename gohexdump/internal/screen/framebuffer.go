@@ -18,3 +18,9 @@ func NewFrameBuffer() *FrameBuffer {
 	return f
 }
 
+func (f *FrameBuffer) Clear() {
+	frame := f.frame
+	for i := range frame {
+		frame[i] = 0.0
+	}
+}

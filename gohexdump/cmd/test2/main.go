@@ -51,8 +51,8 @@ func cmdHandler(file *os.File, events chan<- int) {
 func writeScreen(s screen.HexScreen) {
 	s.Hold()
 
-	normal := screen.NewBrightness(.05)
-	mid := screen.NewBrightness(.1)
+	normal := screen.NewBrightness(.1)
+	mid := screen.NewBrightness(.2)
 
 	for xi:= 0; xi<16; xi++ {
 
@@ -131,7 +131,7 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	rippleCursor := screen.NewRippleCursor()
+	rippleCursor := screen.NewRippleCursor(.5)
 	filters := []screen.Filter { rippleCursor, screen.NewAfterGlowFilter(.8) }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
