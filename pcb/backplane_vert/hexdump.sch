@@ -1,0 +1,237 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector:Conn_01x09_Female J1
+U 1 1 5D40479F
+P 2700 4200
+F 0 "J1" H 2727 4226 50  0000 L CNN
+F 1 "Conn_01x07_Female" H 2727 4135 50  0000 L CNN
+F 2 "footprints:header-1x9" H 2700 4200 50  0001 C CNN
+F 3 "~" H 2700 4200 50  0001 C CNN
+	1    2700 4200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR04
+U 1 1 5D40488F
+P 2400 4700
+F 0 "#PWR04" H 2400 4450 50  0001 C CNN
+F 1 "GND" H 2405 4527 50  0000 C CNN
+F 2 "" H 2400 4700 50  0001 C CNN
+F 3 "" H 2400 4700 50  0001 C CNN
+	1    2400 4700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 3800 2300 3800
+Wire Wire Line
+	2400 4700 2400 4600
+Wire Wire Line
+	2400 4600 2500 4600
+Wire Wire Line
+	2400 4600 2400 4300
+Wire Wire Line
+	2400 4300 2500 4300
+Connection ~ 2400 4600
+Wire Wire Line
+	2400 4300 2400 3900
+Wire Wire Line
+	2400 3900 2500 3900
+Connection ~ 2400 4300
+Wire Wire Line
+	2500 4000 1950 4000
+Wire Wire Line
+	1950 4000 1950 3600
+Wire Wire Line
+	1950 4000 1950 4100
+Wire Wire Line
+	1950 4100 2500 4100
+Connection ~ 1950 4000
+Wire Wire Line
+	1950 4100 1950 4200
+Wire Wire Line
+	1950 4200 2500 4200
+Connection ~ 1950 4100
+$Comp
+L power:VCC #PWR01
+U 1 1 5D4755C2
+P 1950 3600
+F 0 "#PWR01" H 1950 3450 50  0001 C CNN
+F 1 "VCC" H 1967 3773 50  0000 C CNN
+F 2 "" H 1950 3600 50  0001 C CNN
+F 3 "" H 1950 3600 50  0001 C CNN
+	1    1950 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x09_Female J3
+U 1 1 5D680335
+P 3950 4200
+F 0 "J3" H 3977 4226 50  0000 L CNN
+F 1 "Conn_01x07_Female" H 3977 4135 50  0000 L CNN
+F 2 "footprints:header-1x9" H 3950 4200 50  0001 C CNN
+F 3 "~" H 3950 4200 50  0001 C CNN
+	1    3950 4200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 4100 3750 4100
+Connection ~ 2500 4100
+Wire Wire Line
+	2500 4000 3750 4000
+Connection ~ 2500 4000
+Wire Wire Line
+	2500 4200 3750 4200
+Connection ~ 2500 4200
+Wire Wire Line
+	2500 4300 3750 4300
+Connection ~ 2500 4300
+Wire Wire Line
+	2500 4600 3750 4600
+Connection ~ 2500 4600
+Wire Wire Line
+	2500 3900 3750 3900
+Connection ~ 2500 3900
+Wire Wire Line
+	3750 3800 3550 3800
+Text Label 2300 3800 2    50   ~ 0
+uart_rx0
+Wire Wire Line
+	2250 4500 2500 4500
+$Comp
+L power:GND #PWR03
+U 1 1 5D650DF9
+P 2250 4700
+F 0 "#PWR03" H 2250 4450 50  0001 C CNN
+F 1 "GND" H 2255 4527 50  0000 C CNN
+F 2 "" H 2250 4700 50  0001 C CNN
+F 3 "" H 2250 4700 50  0001 C CNN
+	1    2250 4700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2250 4500 2250 4700
+Text Label 3550 3800 2    50   ~ 0
+uart_rx0
+$Comp
+L Device:CP C1
+U 1 1 6335A192
+P 5550 4100
+F 0 "C1" H 5668 4146 50  0000 L CNN
+F 1 "CP" H 5668 4055 50  0000 L CNN
+F 2 "Capacitor_SMD:CP_Elec_10x10" H 5588 3950 50  0001 C CNN
+F 3 "~" H 5550 4100 50  0001 C CNN
+	1    5550 4100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP C2
+U 1 1 6335A946
+P 5900 4100
+F 0 "C2" H 6018 4146 50  0000 L CNN
+F 1 "CP" H 6018 4055 50  0000 L CNN
+F 2 "Capacitor_SMD:CP_Elec_8x6.9" H 5938 3950 50  0001 C CNN
+F 3 "~" H 5900 4100 50  0001 C CNN
+	1    5900 4100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP C3
+U 1 1 6335ACC5
+P 6250 4100
+F 0 "C3" H 6368 4146 50  0000 L CNN
+F 1 "CP" H 6368 4055 50  0000 L CNN
+F 2 "Capacitor_THT:C_Radial_D10.0mm_H16.0mm_P5.00mm" H 6288 3950 50  0001 C CNN
+F 3 "~" H 6250 4100 50  0001 C CNN
+	1    6250 4100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP C4
+U 1 1 6335B1F7
+P 6550 4100
+F 0 "C4" H 6668 4146 50  0000 L CNN
+F 1 "CP" H 6668 4055 50  0000 L CNN
+F 2 "Capacitor_THT:C_Radial_D8.0mm_H11.5mm_P3.50mm" H 6588 3950 50  0001 C CNN
+F 3 "~" H 6550 4100 50  0001 C CNN
+	1    6550 4100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5550 3950 5550 3800
+Wire Wire Line
+	5550 3800 5900 3800
+Wire Wire Line
+	6550 3800 6550 3950
+Wire Wire Line
+	6250 3950 6250 3800
+Connection ~ 6250 3800
+Wire Wire Line
+	6250 3800 6550 3800
+Wire Wire Line
+	5900 3950 5900 3800
+Connection ~ 5900 3800
+Wire Wire Line
+	5900 3800 6100 3800
+Wire Wire Line
+	5550 4250 5550 4400
+Wire Wire Line
+	5550 4400 5900 4400
+Wire Wire Line
+	6550 4400 6550 4250
+Wire Wire Line
+	6250 4250 6250 4400
+Connection ~ 6250 4400
+Wire Wire Line
+	6250 4400 6550 4400
+Wire Wire Line
+	5900 4250 5900 4400
+Connection ~ 5900 4400
+Wire Wire Line
+	5900 4400 6100 4400
+$Comp
+L power:GND #PWR0101
+U 1 1 6335EE85
+P 6100 4600
+F 0 "#PWR0101" H 6100 4350 50  0001 C CNN
+F 1 "GND" H 6105 4427 50  0000 C CNN
+F 2 "" H 6100 4600 50  0001 C CNN
+F 3 "" H 6100 4600 50  0001 C CNN
+	1    6100 4600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6100 4400 6100 4600
+Connection ~ 6100 4400
+Wire Wire Line
+	6100 4400 6250 4400
+Wire Wire Line
+	6100 3800 6100 3400
+$Comp
+L power:VCC #PWR0102
+U 1 1 63363CA9
+P 6100 3400
+F 0 "#PWR0102" H 6100 3250 50  0001 C CNN
+F 1 "VCC" H 6117 3573 50  0000 C CNN
+F 2 "" H 6100 3400 50  0001 C CNN
+F 3 "" H 6100 3400 50  0001 C CNN
+	1    6100 3400
+	1    0    0    -1  
+$EndComp
+Connection ~ 6100 3800
+Wire Wire Line
+	6100 3800 6250 3800
+$EndSCHEMATC
