@@ -1,0 +1,337 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L teensy:Teensy4.0 U1
+U 1 1 632DEF41
+P 3650 3700
+F 0 "U1" H 3650 5315 50  0000 C CNN
+F 1 "Teensy4.0" H 3650 5224 50  0000 C CNN
+F 2 "teensy:Teensy40" H 3250 3900 50  0001 C CNN
+F 3 "" H 3250 3900 50  0001 C CNN
+	1    3650 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 63333C8A
+P 5200 5350
+F 0 "#PWR0102" H 5200 5100 50  0001 C CNN
+F 1 "GND" H 5205 5177 50  0000 C CNN
+F 2 "" H 5200 5350 50  0001 C CNN
+F 3 "" H 5200 5350 50  0001 C CNN
+	1    5200 5350
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0103
+U 1 1 6333496C
+P 1950 4050
+F 0 "#PWR0103" H 1950 3800 50  0001 C CNN
+F 1 "GND" H 1955 3877 50  0000 C CNN
+F 2 "" H 1950 4050 50  0001 C CNN
+F 3 "" H 1950 4050 50  0001 C CNN
+	1    1950 4050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2550 3950 1950 3950
+Wire Wire Line
+	1950 3950 1950 4050
+$Comp
+L power:GND #PWR0104
+U 1 1 63336A5E
+P 1950 2450
+F 0 "#PWR0104" H 1950 2200 50  0001 C CNN
+F 1 "GND" H 1955 2277 50  0000 C CNN
+F 2 "" H 1950 2450 50  0001 C CNN
+F 3 "" H 1950 2450 50  0001 C CNN
+	1    1950 2450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2550 2350 1950 2350
+Wire Wire Line
+	1950 2350 1950 2450
+$Comp
+L power:GND #PWR0105
+U 1 1 6333A3E8
+P 5650 3250
+F 0 "#PWR0105" H 5650 3000 50  0001 C CNN
+F 1 "GND" H 5655 3077 50  0000 C CNN
+F 2 "" H 5650 3250 50  0001 C CNN
+F 3 "" H 5650 3250 50  0001 C CNN
+	1    5650 3250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4750 3050 5650 3050
+Wire Wire Line
+	5650 3050 5650 3250
+$Comp
+L Connector_Generic:Conn_02x08_Odd_Even J1
+U 1 1 633ACF7B
+P 6250 5250
+F 0 "J1" H 6300 5767 50  0000 C CNN
+F 1 "Conn_02x08_Odd_Even" H 6300 5676 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical" H 6250 5250 50  0001 C CNN
+F 3 "~" H 6250 5250 50  0001 C CNN
+	1    6250 5250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0108
+U 1 1 633ACF28
+P 6700 5800
+F 0 "#PWR0108" H 6700 5550 50  0001 C CNN
+F 1 "GND" H 6705 5627 50  0000 C CNN
+F 2 "" H 6700 5800 50  0001 C CNN
+F 3 "" H 6700 5800 50  0001 C CNN
+	1    6700 5800
+	1    0    0    -1  
+$EndComp
+Connection ~ 6700 5550
+Wire Wire Line
+	6700 5550 6550 5550
+Wire Wire Line
+	6700 5550 6700 5450
+Connection ~ 6700 5450
+Wire Wire Line
+	6700 5450 6550 5450
+Wire Wire Line
+	6700 5450 6700 5350
+Connection ~ 6700 5350
+Wire Wire Line
+	6700 5350 6550 5350
+Wire Wire Line
+	6700 5350 6700 5250
+Connection ~ 6700 5250
+Wire Wire Line
+	6700 5250 6550 5250
+Wire Wire Line
+	6700 5250 6700 5150
+Connection ~ 6700 5150
+Wire Wire Line
+	6700 5150 6550 5150
+Wire Wire Line
+	6700 5150 6700 5050
+Wire Wire Line
+	6700 5050 6700 4950
+Connection ~ 6700 5050
+Wire Wire Line
+	6700 5050 6550 5050
+Wire Wire Line
+	6700 4950 6550 4950
+Wire Wire Line
+	6700 5650 6700 5800
+Wire Wire Line
+	6700 5650 6700 5550
+Connection ~ 6700 5650
+Wire Wire Line
+	6550 5650 6700 5650
+$Comp
+L Connector_Generic:Conn_02x08_Odd_Even J2
+U 1 1 6336AB4B
+P 6300 2300
+F 0 "J2" H 6350 2817 50  0000 C CNN
+F 1 "Conn_02x08_Odd_Even" H 6350 2726 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical" H 6300 2300 50  0001 C CNN
+F 3 "~" H 6300 2300 50  0001 C CNN
+	1    6300 2300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0101
+U 1 1 633269F2
+P 6750 2850
+F 0 "#PWR0101" H 6750 2600 50  0001 C CNN
+F 1 "GND" H 6755 2677 50  0000 C CNN
+F 2 "" H 6750 2850 50  0001 C CNN
+F 3 "" H 6750 2850 50  0001 C CNN
+	1    6750 2850
+	1    0    0    -1  
+$EndComp
+Connection ~ 6750 2600
+Wire Wire Line
+	6750 2600 6600 2600
+Wire Wire Line
+	6750 2600 6750 2500
+Connection ~ 6750 2500
+Wire Wire Line
+	6750 2500 6600 2500
+Wire Wire Line
+	6750 2500 6750 2400
+Connection ~ 6750 2400
+Wire Wire Line
+	6750 2400 6600 2400
+Wire Wire Line
+	6750 2400 6750 2300
+Connection ~ 6750 2300
+Wire Wire Line
+	6750 2300 6600 2300
+Wire Wire Line
+	6750 2300 6750 2200
+Connection ~ 6750 2200
+Wire Wire Line
+	6750 2200 6600 2200
+Wire Wire Line
+	6750 2200 6750 2100
+Wire Wire Line
+	6750 2100 6750 2000
+Connection ~ 6750 2100
+Wire Wire Line
+	6750 2100 6600 2100
+Wire Wire Line
+	6750 2000 6600 2000
+Wire Wire Line
+	6750 2700 6750 2850
+Wire Wire Line
+	6750 2700 6750 2600
+Connection ~ 6750 2700
+Wire Wire Line
+	6600 2700 6750 2700
+Text GLabel 5700 2000 0    50   Input ~ 0
+P0
+Text GLabel 5700 2100 0    50   Input ~ 0
+P1
+Text GLabel 5700 2200 0    50   Input ~ 0
+P2
+Text GLabel 5700 2300 0    50   Input ~ 0
+P3
+Text GLabel 5700 2400 0    50   Input ~ 0
+P4
+Text GLabel 5700 2500 0    50   Input ~ 0
+P5
+Text GLabel 5700 2700 0    50   Input ~ 0
+P7
+Text GLabel 5700 2600 0    50   Input ~ 0
+P6
+Text GLabel 5700 4950 0    50   Input ~ 0
+P8
+Text GLabel 5700 5050 0    50   Input ~ 0
+P9
+Text GLabel 5700 5150 0    50   Input ~ 0
+P10
+Text GLabel 5700 5250 0    50   Input ~ 0
+P11
+Text GLabel 5700 5350 0    50   Input ~ 0
+P12
+Text GLabel 5700 5450 0    50   Input ~ 0
+P13
+Text GLabel 5700 5650 0    50   Input ~ 0
+P15
+Text GLabel 5700 5550 0    50   Input ~ 0
+P14
+Wire Wire Line
+	5700 4950 6050 4950
+Wire Wire Line
+	6050 5050 5700 5050
+Wire Wire Line
+	5700 5150 6050 5150
+Wire Wire Line
+	6050 5250 5700 5250
+Wire Wire Line
+	5700 5350 6050 5350
+Wire Wire Line
+	6050 5450 5700 5450
+Wire Wire Line
+	5700 5550 6050 5550
+Wire Wire Line
+	6050 5650 5700 5650
+Wire Wire Line
+	5700 2000 6100 2000
+Wire Wire Line
+	6100 2100 5700 2100
+Wire Wire Line
+	5700 2200 6100 2200
+Wire Wire Line
+	6100 2300 5700 2300
+Wire Wire Line
+	5700 2400 6100 2400
+Wire Wire Line
+	5700 2500 6100 2500
+Wire Wire Line
+	5700 2600 6100 2600
+Wire Wire Line
+	6100 2700 5700 2700
+Text GLabel 2350 4250 0    50   Input ~ 0
+P1
+Wire Wire Line
+	2350 4250 2550 4250
+Text GLabel 2350 4350 0    50   Input ~ 0
+P14
+Wire Wire Line
+	2350 4350 2550 4350
+Text GLabel 2350 4450 0    50   Input ~ 0
+P15
+Wire Wire Line
+	2350 4450 2550 4450
+Text GLabel 2350 4550 0    50   Input ~ 0
+P0
+Wire Wire Line
+	2350 4550 2550 4550
+Text GLabel 2350 4650 0    50   Input ~ 0
+P2
+Text GLabel 2350 4750 0    50   Input ~ 0
+P13
+Text GLabel 2350 4850 0    50   Input ~ 0
+P3
+Text GLabel 2350 4950 0    50   Input ~ 0
+P12
+Wire Wire Line
+	2350 4650 2550 4650
+Wire Wire Line
+	2350 4750 2550 4750
+Wire Wire Line
+	2350 4850 2550 4850
+Wire Wire Line
+	2350 4950 2550 4950
+Text GLabel 4850 5050 2    50   Input ~ 0
+P4
+Wire Wire Line
+	2350 5050 2550 5050
+Text GLabel 2350 5050 0    50   Input ~ 0
+P11
+Wire Wire Line
+	4750 4750 5200 4750
+Wire Wire Line
+	5200 4750 5200 5350
+Wire Wire Line
+	4850 5050 4750 5050
+Text GLabel 2300 3250 0    50   Input ~ 0
+P5
+Text GLabel 4850 4950 2    50   Input ~ 0
+P10
+Wire Wire Line
+	4750 4950 4850 4950
+Text GLabel 2300 3550 0    50   Input ~ 0
+P9
+Text GLabel 2300 3650 0    50   Input ~ 0
+P6
+Wire Wire Line
+	2300 3550 2550 3550
+Wire Wire Line
+	2300 3650 2550 3650
+Text GLabel 2300 3450 0    50   Input ~ 0
+P8
+Text GLabel 2300 3350 0    50   Input ~ 0
+P7
+Wire Wire Line
+	2300 3350 2550 3350
+Wire Wire Line
+	2300 3450 2550 3450
+Wire Wire Line
+	2300 3250 2550 3250
+$EndSCHEMATC

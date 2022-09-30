@@ -1,0 +1,18 @@
+(module hackerport (layer F.Cu) (tedit 578E3458)
+  (fp_text reference P3 (at 0 0.5) (layer F.SilkS) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value hackerport (at 0 3.81) (layer F.Fab) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (pad 1 smd rect (at -6.35 1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 2 smd rect (at -6.35 -1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 4 smd rect (at -3.81 -1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 6 smd rect (at -1.27 -1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 7 smd rect (at 1.27 1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 8 smd rect (at 1.27 -1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 9 smd rect (at 3.81 1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 10 smd rect (at 3.81 -1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 11 smd rect (at 6.35 1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+  (pad 12 smd rect (at 6.35 -1.27) (size 1.5875 1.5875) (layers F.Cu F.Paste F.Mask))
+)
