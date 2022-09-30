@@ -34,7 +34,7 @@ static const uint8_t segment_pin_interleaved[] =
  *
  * Frame sent over serial:
  *
- *                  [  0  1 ] } 2x 16 bytes (A B C D E F G1 G2 H J K L M N Dp nc)
+ *                  [  0  1 ] } 2x 16x little-endian uint16 in range: [0x0000..0xff00] (A B C D E F G1 G2 H J K L M N Dp nc)
  *                  [  2  3 ]   same...
  *                  [  4  5 ]   ...
  *                  [  6  7 ]
@@ -50,6 +50,7 @@ static const uint8_t segment_pin_interleaved[] =
  *                  [ 1A 1B ]
  *                  [ 1C 1D ]
  *                  [ 1E 1F ]
+ *                            + END OF FRAME MARKER "\xff\xff\xff\xf0"
  *
  *                Frame internal mapping:
  * 
@@ -90,8 +91,6 @@ typedef struct
 	uint8_t low_bits[N_LEDS];
 } frame_t;
 
-uint8_t residual[N_LEDS];
-
 static frame_t frame_a __attribute__((aligned(4)));
 static frame_t frame_b __attribute__((aligned(4)));
 
@@ -112,10 +111,10 @@ static volatile uint8_t recv_buf[RECV_BUF_SZ];
 enum
 {
 	B15, B14, B13, B12, BX, BY,
-	P15, P14, P13, P12, P11, P10, P9, P8, PD, PR,
+	P15, P14, P13, P12, P11, P10, P9, P8,
 	P7, P6, P5, P4, P3, P2, P1, P0,
 	ZX, /* send zeroes */
-	OFF,
+//	OFF,
 	E0, E1, E2, E3, E4, E5, E6, E7, E8,
 	ZZZ,
 };
@@ -156,7 +155,7 @@ const uint32_t select_row[] =
 	SET   ( BIT_SELECT_A ) | CLEAR ( BIT_SELECT_B ),
 };
 
-static void off(void)              { GPIOA->BSRR = CLEAR(BIT_ENABLE_HIGH) | SET(BIT_NOT_OUTPUT_ENABLE); }
+//static void off(void)              { GPIOA->BSRR = CLEAR(BIT_ENABLE_HIGH) | SET(BIT_NOT_OUTPUT_ENABLE); }
 
 static void bitbang_15(void)       { bitbang64_clk_stm32(buf15, (void *)GPIOA);
                                      GPIOA->BSRR = select_row[cur_row];
@@ -165,7 +164,7 @@ static void bitbang_14(void)       { bitbang64_clk_stm32(buf14, (void *)GPIOA); 
 static void bitbang_13(void)       { bitbang64_clk_stm32(buf13, (void *)GPIOA); }
 static void bitbang_12(void)       { bitbang64_clk_stm32(buf12, (void *)GPIOA); }
 static void bitbang_x(void)        { bitbang64_clk_stm32(bufx,  (void *)GPIOA); }
-static void bitbang_y_switch(void) { bitbang64_clk_no_enable_stm32(bufy,  (void *)GPIOA); }
+static void bitbang_y_no_enable(void) { bitbang64_clk_no_enable_stm32(bufy,  (void *)GPIOA); }
 
 static void prepare_15(void) { draw_frame = cur_frame;
                                cur_pos += N_BITS_PER_ROW; if (cur_pos>=N_LEDS) cur_pos = 0;
@@ -200,9 +199,6 @@ static void enable_2(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, S
 static void enable_1(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>8); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
 static void enable_0(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>9); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
 
-static void prepare_dith(void) { dithcomp128(&residual[cur_pos], &draw_frame->low_bits[cur_pos]); }
-static void prepare_res(void)  { precomp64(bufy, &residual[cur_pos], 7, X4(BIT_ENABLE_HIGH)); }
-
 static void zero_x(void) { precomp64(bufx, zeroes, 0, X4(BIT_ENABLE_HIGH)); }
 
 static void ret(void) { }
@@ -216,7 +212,7 @@ const func_t dispatch[] =
 	[B13] = bitbang_13,
 	[B12] = bitbang_12,
 	[BX] = bitbang_x,
-	[BY] = bitbang_y_switch,
+	[BY] = bitbang_y_no_enable,
 	[P15] = prepare_15,
 	[P14] = prepare_14,
 	[P13] = prepare_13,
@@ -245,9 +241,7 @@ const func_t dispatch[] =
 	[E0] = enable_0,
 
 	[ZX] = zero_x,
-	[PD] = prepare_dith,
-	[PR] = prepare_res,
-	[OFF] = off,
+//	[OFF] = off,
 	[ZZZ]= ret,
 };
 

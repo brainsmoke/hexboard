@@ -1,5 +1,5 @@
 
-#include <bitbang.h>
+#include <bitbang16.h>
 
 .include "m0delay.s"
 
@@ -197,51 +197,51 @@ precomp64_end:
 #undef rMASK
 #undef rOTHERPINS
 
-	.global	dithcomp128
-	.code	16
-	.thumb_func
-	.type	dithcomp128, %function
-dithcomp128:
-	.syntax unified
-	.thumb
-
-#define rRESIDUAL r0
-#define rFRAME    r1
-#define rMASK     r2
-#define rRESA     r3
-#define rRESB     r4
-#define rA        r5
-#define rB        r6
-dithcomp128_start:
-/*    0 + 4 */ push {r4-r6}
-/*    4 + 2 */ ldr rMASK,    =0x7f7f7f7f
-
-.rept 16
-/* +  0 + 3 */ ldm rRESIDUAL!, {rRESA, rRESB}
-/* +  3 + 3 */ ldm rFRAME!, {rA, rB}
-/* +  6 + 1 */ subs rRESIDUAL, #8
-/* +  7 + 1 */ ands rRESA, rMASK
-/* +  8 + 1 */ ands rRESB, rMASK
-/* +  9 + 1 */ ands rA, rMASK
-/* + 10 + 1 */ ands rB, rMASK
-/* + 11 + 1 */ adds rRESA, rA
-/* + 12 + 1 */ adds rRESB, rB
-/* + 13 + 3 */ stm rRESIDUAL!, {rRESA, rRESB}
-.endr
-
-/*  262 + 4 */ pop {r4-r6}
-dithcomp128_end:
-/*  266 + 3 */ bx lr
-/*  269 */
-
-	.size	dithcomp128, .-dithcomp128
-#undef rRESIDUAL
-#undef rFRAME
-#undef rMASK
-#undef rRESA
-#undef rRESB
-#undef rA
-#undef rB
+//	.global	dithcomp128
+//	.code	16
+//	.thumb_func
+//	.type	dithcomp128, %function
+//dithcomp128:
+//	.syntax unified
+//	.thumb
+//
+//#define rRESIDUAL r0
+//#define rFRAME    r1
+//#define rMASK     r2
+//#define rRESA     r3
+//#define rRESB     r4
+//#define rA        r5
+//#define rB        r6
+//dithcomp128_start:
+///*    0 + 4 */ push {r4-r6}
+///*    4 + 2 */ ldr rMASK,    =0x7f7f7f7f
+//
+//.rept 16
+///* +  0 + 3 */ ldm rRESIDUAL!, {rRESA, rRESB}
+///* +  3 + 3 */ ldm rFRAME!, {rA, rB}
+///* +  6 + 1 */ subs rRESIDUAL, #8
+///* +  7 + 1 */ ands rRESA, rMASK
+///* +  8 + 1 */ ands rRESB, rMASK
+///* +  9 + 1 */ ands rA, rMASK
+///* + 10 + 1 */ ands rB, rMASK
+///* + 11 + 1 */ adds rRESA, rA
+///* + 12 + 1 */ adds rRESB, rB
+///* + 13 + 3 */ stm rRESIDUAL!, {rRESA, rRESB}
+//.endr
+//
+///*  262 + 4 */ pop {r4-r6}
+//dithcomp128_end:
+///*  266 + 3 */ bx lr
+///*  269 */
+//
+//	.size	dithcomp128, .-dithcomp128
+//#undef rRESIDUAL
+//#undef rFRAME
+//#undef rMASK
+//#undef rRESA
+//#undef rRESB
+//#undef rA
+//#undef rB
 
 	.global	write_wait_write
 	.code	16
@@ -317,16 +317,3 @@ bx lr
 
 	.size	write_wait_write, .-write_wait_write
 
-	.global	wait_a_bit
-	.code	16
-	.thumb_func
-	.type	wait_a_bit, %function
-wait_a_bit:
-	.syntax unified
-	.thumb
-wait_a_bit_start:
-delay r0, 100
-wait_a_bit_end:
-bx lr
-
-	.size	wait_a_bit, .-wait_a_bit

@@ -6,11 +6,6 @@
 #define GPIO_ODR_OFFSET (0x14)
 #define GPIO_BSRR_OFFSET (0x18)
 
-/* protocol */
-
-#define END_OF_FRAME (0xfe)
-#define DISCARD_FRAME (0xff)
-
 /* GPIO, BSRR */
 
 #define CLEAR(X) (X<<16)
@@ -89,10 +84,7 @@ void bitbang64_clk_no_enable_stm32(uint8_t *buffer, volatile uint16_t *gpio);
  */
 void precomp64(uint8_t *precomp_buf, uint8_t *frame, uint32_t bit, uint32_t otherpins4x);
 
-void dithcomp128(uint8_t *residual, uint8_t *frame);
-
 void write_wait_write(volatile uint32_t *addr, uint32_t pre_data, uint32_t post_data, uint32_t cycles);
-void wait_a_bit(void);
 
 #endif
 
