@@ -117,33 +117,38 @@ enum
 //	OFF,
 	E0, E1, E2, E3, E4, E5, E6, E7, E8,
 	ZZZ,
+	SWITCH,
 };
 
+#define TABLE_COLS (19)
+#define TABLE_ROWS (16)
+#define TABLE_SIZE (TABLE_COLS*TABLE_ROWS)
 
-static const uint8_t dtable[288] = /* SysTick dispatch table for BCM bitbang & precomputation */
+/* SysTick dispatch table for BCM bitbang & precomputation */
+static const uint8_t dtable[TABLE_SIZE] =
 {
 /*	 15    .    .    .    .    .    .    .   14    .    .    .   13    .   12  11/10 dith */
 
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P8, P15, B13, ZZZ, B12,  BX,  BY, E8,
-	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P4, P15, B13, ZZZ, B12,  BX,  BY, E4,
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P6, P15, B13, ZZZ, B12,  BX,  BY, E6,
-	B15, ZZZ, P14, P13, P12, ZZZ,  P9, ZZZ, B14, ZZZ,  P2, P15, B13, ZZZ, B12,  BX,  BY, E2,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P8, P15, B13, ZZZ, B12,  BX,  BY, E8, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P4, P15, B13, ZZZ, B12,  BX,  BY, E4, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P6, P15, B13, ZZZ, B12,  BX,  BY, E6, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ,  P9, ZZZ, B14, ZZZ,  P2, P15, B13, ZZZ, B12,  BX,  BY, E2, SWITCH,
 
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P7, P15, B13, ZZZ, B12,  BX,  BY, E7,
-	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P3, P15, B13, ZZZ, B12,  BX,  BY, E3,
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P5, P15, B13, ZZZ, B12,  BX,  BY, E5,
-	B15, ZZZ, P14, P13, P12, ZZZ,  ZX, ZZZ, B14, ZZZ,  P1, P15, B13, ZZZ, B12,  BX,  BY, E2,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P7, P15, B13, ZZZ, B12,  BX,  BY, E7, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P3, P15, B13, ZZZ, B12,  BX,  BY, E3, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P5, P15, B13, ZZZ, B12,  BX,  BY, E5, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ,  ZX, ZZZ, B14, ZZZ,  P1, P15, B13, ZZZ, B12,  BX,  BY, E2, SWITCH,
 
 
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P8, P15, B13, ZZZ, B12,  BX,  BY, E8,
-	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P4, P15, B13, ZZZ, B12,  BX,  BY, E4,
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P6, P15, B13, ZZZ, B12,  BX,  BY, E6,
-	B15, ZZZ, P14, P13, P12, ZZZ,  P9, ZZZ, B14, ZZZ,  P2, P15, B13, ZZZ, B12,  BX,  BY, E2,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P8, P15, B13, ZZZ, B12,  BX,  BY, E8, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P4, P15, B13, ZZZ, B12,  BX,  BY, E4, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P6, P15, B13, ZZZ, B12,  BX,  BY, E6, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ,  P9, ZZZ, B14, ZZZ,  P2, P15, B13, ZZZ, B12,  BX,  BY, E2, SWITCH,
 
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P7, P15, B13, ZZZ, B12,  BX,  BY, E7,
-	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P3, P15, B13, ZZZ, B12,  BX,  BY, E3,
-	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P5, P15, B13, ZZZ, B12,  BX,  BY, E5,
-	B15, ZZZ, P14, P13, P12, ZZZ,  ZX, ZZZ, B14, ZZZ,  P0, P15, B13, ZZZ, B12,  BX,  BY, E1,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P7, P15, B13, ZZZ, B12,  BX,  BY, E7, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P10, ZZZ, B14, ZZZ,  P3, P15, B13, ZZZ, B12,  BX,  BY, E3, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ, P11, ZZZ, B14, ZZZ,  P5, P15, B13, ZZZ, B12,  BX,  BY, E5, SWITCH,
+	B15, ZZZ, P14, P13, P12, ZZZ,  ZX, ZZZ, B14, ZZZ,  P0, P15, B13, ZZZ, B12,  BX,  BY, E1, SWITCH,
 
 };
 
@@ -156,6 +161,8 @@ const uint32_t select_row[] =
 };
 
 //static void off(void)              { GPIOA->BSRR = CLEAR(BIT_ENABLE_HIGH) | SET(BIT_NOT_OUTPUT_ENABLE); }
+
+static void switch_addr(void) { GPIOA->BSRR = select_row[cur_row]; }
 
 static void bitbang_15(void)       { bitbang64_clk_stm32(buf15, (void *)GPIOA);
                                      GPIOA->BSRR = select_row[cur_row];
@@ -185,19 +192,21 @@ static void prepare_2(void)  { precomp64(bufy,  &draw_frame->low_bits[cur_pos], 
 static void prepare_1(void)  { precomp64(bufy,  &draw_frame->low_bits[cur_pos], 1, X4(BIT_ENABLE_HIGH)); }
 static void prepare_0(void)  { precomp64(bufy,  &draw_frame->low_bits[cur_pos], 0, X4(BIT_ENABLE_HIGH)); }
 
-#define FLIP_OFF (SET(BIT_NOT_OUTPUT_ENABLE)|CLEAR(BIT_ENABLE_HIGH))
+//#define FLIP_OFF (SET(BIT_NOT_OUTPUT_ENABLE)|CLEAR(BIT_ENABLE_HIGH))
+#define FLIP_OFF (SET(BIT_NOT_OUTPUT_ENABLE))
 #define FLIP_ON  (SET(BIT_ENABLE_HIGH)|CLEAR(BIT_NOT_OUTPUT_ENABLE))
-#define SYSTICK_PERIOD ((uint32_t)(8*( F_SYS_TICK_CLK/28800/4 )))
+#define SYSTICK_PERIOD ((uint32_t)(F_SYS_TICK_CLK/(TABLE_SIZE*100)/4 ))
+#define SYSTICK_CYCLES ((uint32_t)(8*SYSTICK_PERIOD))
 
-static void enable_8(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>1); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_7(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>2); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_6(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>3); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_5(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>4); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_4(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>5); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_3(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>6); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_2(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>7); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_1(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>8); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
-static void enable_0(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_PERIOD>>9); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= 18; }
+static void enable_8(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>1); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_7(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>2); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_6(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>3); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_5(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>4); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_4(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>5); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_3(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>6); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_2(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>7); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_1(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>8); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
+static void enable_0(void) { write_wait_write(&GPIOA->BSRR, FLIP_ON, FLIP_OFF, SYSTICK_CYCLES>>9); cur_row = (cur_row+1)&(N_ROWS-1); if (cur_row) iter -= TABLE_COLS; }
 
 static void zero_x(void) { precomp64(bufx, zeroes, 0, X4(BIT_ENABLE_HIGH)); }
 
@@ -243,13 +252,14 @@ const func_t dispatch[] =
 	[ZX] = zero_x,
 //	[OFF] = off,
 	[ZZZ]= ret,
+	[SWITCH]= switch_addr,
 };
 
 void SysTick_Handler(void)
 {
 	dispatch[dtable[iter]]();
 
-	if (iter < 287)
+	if (iter < TABLE_SIZE-1)
 		iter = iter+1;
 	else
 		iter = 0;
@@ -261,12 +271,14 @@ static void init(void)
 	GPIOA->ODR = BIT_NOT_OUTPUT_ENABLE;
     GPIOA->MODER = SWD|O(0)|O(1)|O(2)|O(4)|O(5)|O(6)|O(7)|O(9)|O(10);
 
-	GPIOA->OSPEEDR = OSPEED_SWD                  |
-	                 OSPEED_HIGH(PIN_LATCH)      |
-	                 OSPEED_HIGH(PIN_DATA_SOUTH) |
-	                 OSPEED_HIGH(PIN_DATA_NORTH) |
-	                 OSPEED_HIGH(PIN_CLK_SOUTH)  |
-	                 OSPEED_HIGH(PIN_CLK_NORTH)  ;
+	GPIOA->OSPEEDR = OSPEED_SWD                         |
+	                 OSPEED_HIGH(PIN_LATCH)             |
+	                 OSPEED_HIGH(PIN_DATA_SOUTH)        |
+	                 OSPEED_HIGH(PIN_DATA_NORTH)        |
+	                 OSPEED_HIGH(PIN_CLK_SOUTH)         |
+	                 OSPEED_HIGH(PIN_CLK_NORTH)         |
+	                 OSPEED_HIGH(PIN_ENABLE_HIGH)       |
+	                 OSPEED_HIGH(PIN_NOT_OUTPUT_ENABLE) ;
 
     GPIOB->ODR = 0*BIT_ENABLE_LOW;
     GPIOB->MODER = O(1);
@@ -307,7 +319,7 @@ static void init(void)
 	cur_pos = -N_BITS_PER_ROW; /* pre-compensate for the first invocation of prepare_10() */
 	prepare_15();
 
-    enable_sys_tick(F_SYS_TICK_CLK/28800/4);
+    enable_sys_tick(SYSTICK_PERIOD);
 }
 
 static inline int dma_getchar(void)
