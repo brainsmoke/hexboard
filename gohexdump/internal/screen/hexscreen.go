@@ -18,15 +18,14 @@ type HexScreen interface {
 
 	SetStyle(s Style)
 	SetStyleAt(s Style, column, row int)
-	SetStyleAtIndex(s Style, index int)
 
-	SetDigit(g font.Glyph, s Style, index int)
+	UpWrap(column, row int) (int, int)
+	DownWrap(column, row int) (int, int)
+	LeftWrap(column, row int) (int, int)
+	RightWrap(column, row int) (int, int)
 
 	WriteRawAt(g []font.Glyph, column, row int)
-	WriteRawAtIndex(g []font.Glyph, index int)
-
 	WriteAt(s string, column, row int)
-	WriteAtIndex(s string, index int)
 
 	WriteRawTitle(g []font.Glyph, start int)
 	WriteRawHexField(g []font.Glyph, field int)
@@ -117,83 +116,70 @@ func (t *hexScreen) SetStyle(s Style) {
 func (t *hexScreen) SetStyleAt(s Style, column, row int) {
 	index := screenInfo.GetIndex(column, row)
 	if index != -1 {
-		t.SetStyleAtIndex(s, index)
-	}
-}
-
-func (t *hexScreen) SetStyleAtIndex(s Style, index int) {
-	if index >= 0 && index < 960 {
 		t.staging[index].style = s.Apply()
+		t.tryUpdate()
 	}
-	t.tryUpdate()
-}
-
-func (t *hexScreen) SetDigit(g font.Glyph, s Style, index int) {
-	if index >= 0 && index < 960 {
-		t.staging[index].glyph = g
-		t.staging[index].style = s.Apply()
-	}
-	t.tryUpdate()
 }
 
 func (t *hexScreen) WriteRawAt(g []font.Glyph, column, row int) {
-	index := screenInfo.GetIndex(column, row)
-	if index != -1 {
-		t.WriteRawAtIndex(g, index)
-	}
-}
 
-func (t *hexScreen) WriteRawAtIndex(g []font.Glyph, index int) {
-	s := t.style.Apply()
-	for i :=range(g) {
-		if i+index >= 0 && i+index < 960 {
-			t.staging[i+index].glyph = g[i]
-			t.staging[i+index].style = s
+	if column < 0 || row < 0 {
+		return
+	}
+
+	i := 0
+	loop: for ; row < screenInfo.Rows ; row++ {
+		for ; column < screenInfo.Columns ; column++ {
+			if i >= len(g) {
+				break loop
+			}
+			index := screenInfo.GetIndex(column, row)
+
+			if index != -1 {
+				s := t.style.Apply()
+				t.staging[index].glyph = g[i]
+				t.staging[index].style = s
+				i++
+			}
 		}
 	}
 	t.tryUpdate()
 }
 
-
 func (t *hexScreen) WriteRawTitle(g []font.Glyph, start int) {
+	if start < 0 || start >= 64 {
+		return
+	}
 	l := 64-start
 	if l > len(g) {
 		l = len(g)
 	}
-	t.WriteRawAtIndex(g[:l], start)
+	t.WriteRawAt(g[:l], start, 0)
 }
 
 func (t *hexScreen) WriteRawHexField(g []font.Glyph, field int) {
 	twodigits := make([]font.Glyph, 2)
 	copy(twodigits, g)
-	index := 64 + 8 + 2*(field%16) + (field/16)*56
-	t.WriteRawAtIndex(twodigits, index)
+	t.WriteRawAt(twodigits, usedColumns[8+2*(field%16)], 2+(field/16))
 }
 
 func (t *hexScreen) WriteRawAsciiField(g font.Glyph, field int) {
-	index := 64 + 8 + 32 + field%16 + (field/16)*56
-	t.SetDigit(g, t.style, index)
+	g_a := []font.Glyph{ g }
+	if 0 <= field && field < 256 {
+		t.WriteRawAt(g_a,  usedColumns[40+(field%16)], 2+(field/16))
+	}
 }
 
 func (t *hexScreen) WriteRawOffset(g []font.Glyph, line int) {
 	offsetdigits := make([]font.Glyph, 8)
 	copy(offsetdigits, g)
-	index := 64 + (line)*56
-	t.WriteRawAtIndex(offsetdigits, index)
+	t.WriteRawAt(offsetdigits, 0, line+2)
 }
 
 
 func (t *hexScreen) WriteAt(s string, column, row int) {
-	index := screenInfo.GetIndex(column, row)
-	if index != -1 {
-		t.WriteAtIndex(s, index)
-	}
+	t.WriteRawAt(t.font.Glyphs(s), column, row)
 }
-
-func (t *hexScreen) WriteAtIndex(s string, index int) {
-	t.WriteRawAtIndex(t.font.Glyphs(s), index)
-}
-
 
 func (t *hexScreen) WriteTitle(s string, start int) {
 	t.WriteRawTitle(t.font.Glyphs(s), start)
@@ -210,5 +196,57 @@ func (t *hexScreen) WriteAsciiField(s string, field int) {
 
 func (t *hexScreen) WriteOffset(s string, line int) {
 	t.WriteRawOffset(t.font.Glyphs(s), line)
+}
+
+
+func (t *hexScreen) UpWrap(column, row int) (int, int) {
+
+	row -= 1
+	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+		row -= 1
+		if row < 0 {
+			row = screenInfo.Rows-1
+		}
+	}
+	return column, row
+}
+
+
+func (t *hexScreen) DownWrap(column, row int) (int, int) {
+
+	row += 1
+	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+		row -= 1
+		if row >= screenInfo.Rows {
+			row = 0
+		}
+	}
+	return column, row
+}
+
+
+func (t *hexScreen) LeftWrap(column, row int) (int, int) {
+
+	column -= 1
+	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+		column -= 1
+		if column < 0 {
+			column = screenInfo.Columns-1
+		}
+	}
+	return column, row
+}
+
+
+func (t *hexScreen) RightWrap(column, row int) (int, int) {
+
+	column += 1
+	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+		column += 1
+		if column >= screenInfo.Columns {
+			column = 0
+		}
+	}
+	return column, row
 }
 

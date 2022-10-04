@@ -54,10 +54,10 @@ type ScreenInfo struct {
 }
 
 var usedColumns = []int{
-	0, 1, 2, 3, 4, 5, 6, 7,
-	13, 14,   16, 17,   19, 20,   22, 23,   25, 26,   28, 29,   31, 32,   34, 35,
-	41, 42,   44, 45,   47, 48,   50, 51,   53, 54,   56, 57,   59, 60,   62, 63,
-	69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
+	0, 1, 2, 3, 4, 5, 6, 7, // offset
+	13, 14,   16, 17,   19, 20,   22, 23,   25, 26,   28, 29,   31, 32,   34, 35, // hex bytes
+	41, 42,   44, 45,   47, 48,   50, 51,   53, 54,   56, 57,   59, 60,   62, 63, // hex bytes
+	69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, // ascii representations
 }
 
 func GetScreenInfo() *ScreenInfo {
@@ -75,25 +75,23 @@ func GetScreenInfo() *ScreenInfo {
 		indices[i] = -1
 	}
 
+	var row, column int
 	ix := 0
-
-	for ix<64 {
-
-		digits[ix].Column = ix
-		digits[ix].Row = 0
-		indices[ix] = ix
-		ix++
-	}
-
-	ix = 64
-
-	for row := 2 ; row < 18; row++ {
-		for _, column := range usedColumns {
-
-			digits[ix].Column = column
-			digits[ix].Row = row
-			indices[row*columns + column] = ix
-			ix++
+	for panel := 0; panel < 30; panel++ {
+		for module := 0; module < 16; module++ {
+			for digit := 0; digit < 2; digit++ {
+				if panel < 28 {
+					row = module+2
+					column = usedColumns[panel*2+digit]
+				} else {
+					row = 0
+					column = 32*(panel-28)+module*2+digit
+				}
+				digits[ix].Column = column
+				digits[ix].Row    = row
+				indices[row*columns + column] = ix
+				ix++
+			}
 		}
 	}
 
@@ -130,6 +128,11 @@ func (s *ScreenInfo) GetIndex(column, row int) int {
 		return -1
 	}
 	return s.indices[row*s.Columns + column]
+}
+
+func (s *ScreenInfo) GetCoord(column, row int) Vector2 {
+	return Vector2 { X: (float64(column)+.5) * digitSize.X + digitLocation.X,
+	                 Y: (float64(row)+.5)    * digitSize.Y + digitLocation.Y }
 }
 
 var screenInfo *ScreenInfo

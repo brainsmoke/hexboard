@@ -7,7 +7,7 @@ import (
 
 type Cursor interface {
 	Filter
-	SetCursor(index int)
+	SetCursor(x, y int)
 }
 
 type RippleCursor struct {
@@ -24,31 +24,33 @@ func NewRippleCursor(brightness float64) Cursor {
     return r
 }
 
-func (r *RippleCursor) SetCursor(index int) {
+func (r *RippleCursor) SetCursor(x, y int) {
 
 	r.mutex.Lock()
-	r.index = index
-	r.blinkCountdown = 50
+	r.index = screenInfo.GetIndex(x, y)
+	r.blinkCountdown = 100
 	r.mutex.Unlock()
-	r.filter.SetRippleOrigin(r.filter.coords[index*16+3])
+	if r.index != -1 {
+		r.filter.SetRippleOrigin(r.filter.coords[r.index])
+	}
 }
 
 func (r *RippleCursor) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 
 	r.mutex.Lock()
 	index := r.index
-	r.blinkCountdown = (r.blinkCountdown+99)%100
+	r.blinkCountdown = (r.blinkCountdown+199)%200
 	countdown := r.blinkCountdown
 	r.mutex.Unlock()
 
-	if countdown < 50 {
+	if index != -1 && countdown < 100 {
 		for i:=0; i<14; i++ {
 			if f.frame[index*16 + i] < .5 {
 				f.frame[index*16 + i] = .5
 			}
 		}
 	}
-	if countdown == 0 {
+	if index != -1 && countdown == 0 {
 		r.filter.Ripple()
 	}
 

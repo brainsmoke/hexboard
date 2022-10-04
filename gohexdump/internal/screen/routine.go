@@ -6,7 +6,7 @@ import (
 //"fmt"
 )
 
-const Fps = 50
+const Fps = 60
 
 type Output interface {
 

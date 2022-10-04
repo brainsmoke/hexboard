@@ -101,7 +101,7 @@ func (r *RippleFilter) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 		c := r.ripples[j].count
 		full := r.brightness * ( 100/float64(c+100) )
 		third := full/3
-		r.ripples[j].count+=2
+		r.ripples[j].count+=1
 		for i, d := range r.ripples[j].cache.d {
 			if c > d && c < d+30 {
 				x := third

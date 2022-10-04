@@ -81,7 +81,8 @@ func main() {
 	multi, screenChan := screen.NewMultiScreen()
 
 	rippleCursor := screen.NewRippleCursor(.15)
-	filters := []screen.Filter { rippleCursor, screen.NewAfterGlowFilter(.8) }
+	filters := []screen.Filter { rippleCursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.8) }
+	//filters := []screen.Filter { rippleCursor, screen.NewAfterGlowFilter(.8)  }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
 
@@ -92,8 +93,8 @@ func main() {
 
 	go screen.DisplayRoutine(drivers.GetDriver(960*16), multi, q)
 
-	x, y := 8+15*2, 7
-	rippleCursor.SetCursor(64 + x + y*56)
+	x, y := 22,8
+	rippleCursor.SetCursor(x, y)
 
 	loop: for {
 		select {
@@ -102,15 +103,15 @@ func main() {
 					case quit:
 						break loop
 					case left:
-						x = (x+55)%56
+						x, y = s.LeftWrap(x, y)
 					case down:
-						y = (y+1)%16
+						x, y = s.DownWrap(x, y)
 					case up:
-						y = (y+15)%16
+						x, y = s.UpWrap(x, y)
 					case right:
-						x = (x+1)%56
+						x, y = s.RightWrap(x, y)
 				}
-				rippleCursor.SetCursor(64 + x + y*56)
+				rippleCursor.SetCursor(x, y)
 		}
 	}
 

@@ -56,7 +56,7 @@ func main() {
 */
 	multi, screenChan := screen.NewMultiScreen()
 
-	filters := []screen.Filter { screen.NewRaindropFilter() }
+	filters := []screen.Filter { screen.NewRaindropFilter(), screen.DefaultGamma() }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
 
