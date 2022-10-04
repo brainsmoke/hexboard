@@ -267,9 +267,9 @@ void SysTick_Handler(void)
 
 static void init(void)
 {
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN; /* enable clock on GPIO A & B */
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN; /* enable clock on GPIO A & B */
 	GPIOA->ODR = BIT_NOT_OUTPUT_ENABLE;
-    GPIOA->MODER = SWD|O(0)|O(1)|O(2)|O(4)|O(5)|O(6)|O(7)|O(9)|O(10);
+	GPIOA->MODER = SWD|O(0)|O(1)|O(2)|O(4)|O(5)|O(6)|O(7)|O(9)|O(10);
 
 	GPIOA->OSPEEDR = OSPEED_SWD                         |
 	                 OSPEED_HIGH(PIN_LATCH)             |
@@ -280,11 +280,11 @@ static void init(void)
 	                 OSPEED_HIGH(PIN_ENABLE_HIGH)       |
 	                 OSPEED_HIGH(PIN_NOT_OUTPUT_ENABLE) ;
 
-    GPIOB->ODR = 0*BIT_ENABLE_LOW;
-    GPIOB->MODER = O(1);
+	GPIOB->ODR = 0*BIT_ENABLE_LOW;
+	GPIOB->MODER = O(1);
 
 	/* There aren't enough lines from the teensy to drive 30 boards in
-     * parallel, so the 16 uarts each send two frames. swdio pulled to ground
+	 * parallel, so the 16 uarts each send two frames. swdio pulled to ground
 	 * on the backplane tells the board it should display the first frame.
 	 * (A floating swdio is internally pulled up by default)
 	 *
@@ -319,7 +319,7 @@ static void init(void)
 	cur_pos = -N_BITS_PER_ROW; /* pre-compensate for the first invocation of prepare_10() */
 	prepare_15();
 
-    enable_sys_tick(SYSTICK_PERIOD);
+	enable_sys_tick(SYSTICK_PERIOD);
 }
 
 static inline int dma_getchar(void)

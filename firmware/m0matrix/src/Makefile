@@ -15,7 +15,7 @@ TEST_FLAGS=
 
 
 MAIN16_SRCS=main16.c bitbang16.S util.c $(STARTUP_SRC)
-MAIN_SRCS=main.c bitbang.S util.c $(STARTUP_SRC)
+MAIN_SRCS=main.c bitbang16.S util.c $(STARTUP_SRC)
 TEST_SRCS=test/test.c bitbang.S util.c $(STARTUP_SRC)
 HEADERS=bitbang.h util.h
 
