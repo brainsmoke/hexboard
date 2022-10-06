@@ -6,7 +6,9 @@ then
 	exit 1
 fi
 
-echo reset halt | nc -N localhost 4444
+#echo reset halt | nc -N localhost 4444
+./gdbhalt.sh 
+
 sleep .1
 echo flash write_image erase "$1" 0x8000000 | nc -N localhost 4444
 sleep .1
