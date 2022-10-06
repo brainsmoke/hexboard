@@ -93,7 +93,7 @@ func main() {
 
 	go screen.DisplayRoutine(drivers.GetDriver(960*16), multi, q)
 
-	x, y := 22,8
+	x, y := 62,9
 	rippleCursor.SetCursor(x, y)
 
 	loop: for {
