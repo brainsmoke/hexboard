@@ -201,7 +201,6 @@ func (t *hexScreen) WriteOffset(s string, line int) {
 
 func (t *hexScreen) UpWrap(column, row int) (int, int) {
 
-	row -= 1
 	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
 		row -= 1
 		if row < 0 {
@@ -214,9 +213,8 @@ func (t *hexScreen) UpWrap(column, row int) (int, int) {
 
 func (t *hexScreen) DownWrap(column, row int) (int, int) {
 
-	row += 1
 	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
-		row -= 1
+		row += 1
 		if row >= screenInfo.Rows {
 			row = 0
 		}
@@ -227,7 +225,6 @@ func (t *hexScreen) DownWrap(column, row int) (int, int) {
 
 func (t *hexScreen) LeftWrap(column, row int) (int, int) {
 
-	column -= 1
 	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
 		column -= 1
 		if column < 0 {
@@ -240,7 +237,6 @@ func (t *hexScreen) LeftWrap(column, row int) (int, int) {
 
 func (t *hexScreen) RightWrap(column, row int) (int, int) {
 
-	column += 1
 	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
 		column += 1
 		if column >= screenInfo.Columns {

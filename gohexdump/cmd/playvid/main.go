@@ -16,7 +16,7 @@ var gamma float64
 func init() {
 
 	flag.IntVar(&fps, "fps", 30, "fps")
-	flag.Float64Var(&gamma, "gamma", 1., "gamma")
+	flag.Float64Var(&gamma, "gamma", 2.5, "gamma")
 }
 
 func main() {

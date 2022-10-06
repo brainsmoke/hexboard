@@ -31,7 +31,7 @@ func (r *RippleCursor) SetCursor(x, y int) {
 	r.blinkCountdown = 100
 	r.mutex.Unlock()
 	if r.index != -1 {
-		r.filter.SetRippleOrigin(r.filter.coords[r.index])
+		r.filter.SetRippleOrigin(r.filter.coords[r.index*16+3])
 	}
 }
 
@@ -45,8 +45,8 @@ func (r *RippleCursor) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 
 	if index != -1 && countdown < 100 {
 		for i:=0; i<14; i++ {
-			if f.frame[index*16 + i] < .5 {
-				f.frame[index*16 + i] = .5
+			if f.frame[index*16 + i] < 1 {
+				f.frame[index*16 + i] = 1
 			}
 		}
 	}

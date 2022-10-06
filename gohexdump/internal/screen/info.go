@@ -131,8 +131,8 @@ func (s *ScreenInfo) GetIndex(column, row int) int {
 }
 
 func (s *ScreenInfo) GetCoord(column, row int) Vector2 {
-	return Vector2 { X: (float64(column)+.5) * digitSize.X + digitLocation.X,
-	                 Y: (float64(row)+.5)    * digitSize.Y + digitLocation.Y }
+	return Vector2 { X: float64(column) * digitSize.X + digitLocation.X,
+	                 Y: float64(row)    * digitSize.Y + digitLocation.Y }
 }
 
 var screenInfo *ScreenInfo
