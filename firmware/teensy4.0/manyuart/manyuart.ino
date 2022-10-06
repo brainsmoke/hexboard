@@ -18,12 +18,11 @@ uint8_t buf_a[N_PINS][BYTES_PER_LINE];
 uint8_t buf_b[N_PINS][BYTES_PER_LINE];
 
 const uint8_t pinlist[N_PINS] = {
-//	/* offsets: */ 12,9, /* hex bytes: */ 10,11,7,21,  19,17,22,16, /* ascii: */ 15,14,18,20,
 
-                                                          /*  v- desolder r1 to disable led */
-	/* offsets: */ 12,9, /* hex bytes: */ 10,11,7,21,  19,17,13,16, /* ascii: */ 15,14,18,20,
+                 /* v- desolder r1 to disable led */
+	/* offsets: */ 13,16,/* hex bytes: */ 15,14,18,20,  6,8,12,9, /* ascii: */ 10,11,7,21,
 
-	/* title bar: */ 6, /* unused: 8 */
+	/* title bar: */ 19, /* unused: 17 */
 };
 
 OctoUart manyUart(1500000, 15, pinlist);
