@@ -5,11 +5,11 @@ import (
 	"math"
 )
 
-const Fps = 50
+const Fps = 60
 const tableBits = 11
 const tableSize = 1<<tableBits
 const cycleBits = 39
-const Multiplier = (1<<cycleBits)*1e9/Fps
+const Multiplier = (  (1000000000<<cycleBits) - ( (1000000000<<cycleBits) % Fps ) )/Fps
 const Shift = cycleBits-tableBits
 const Mask = tableSize-1
 

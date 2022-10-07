@@ -3,7 +3,7 @@ package screen
 
 import (
 	"time"
-//"fmt"
+	"fmt"
 )
 
 const Fps = 60
@@ -15,7 +15,7 @@ type Output interface {
 
 func DisplayRoutine(out Output, s Screen, quit <-chan bool) {
 
-	var counter uint64
+	var counter, prev_counter uint64
 	var frames = []*FrameBuffer { NewFrameBuffer(), NewFrameBuffer() }
 	cur, old := 0, 1
 
@@ -24,6 +24,7 @@ func DisplayRoutine(out Output, s Screen, quit <-chan bool) {
 	}
 
 	tick := time.NewTicker(time.Second / time.Duration(Fps))
+	seconds := time.NewTicker(time.Second)
 
 	loop: for {
 		select {
@@ -42,6 +43,10 @@ func DisplayRoutine(out Output, s Screen, quit <-chan bool) {
 				if !s.NextFrame(frames[cur], frames[old], counter) {
 					return
 				}
+
+			case <-seconds.C:
+				fmt.Printf("fps: %d\n", counter-prev_counter)
+				prev_counter = counter
 		}
 	}
 
