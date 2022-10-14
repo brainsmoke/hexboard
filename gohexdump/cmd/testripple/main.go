@@ -62,6 +62,8 @@ func main() {
 	}
 
 	s := screen.NewHexScreen()
+	info := s.Info()
+
 	s.SetFont(font.GetFont())
 	s.WriteHexField("S", 7*16+2)
 	s.WriteHexField("Y", 7*16+3)
@@ -80,7 +82,7 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	rippleCursor := screen.NewRippleCursor(.25)
+	rippleCursor := screen.NewRippleCursor(.25, info)
 	filters := []screen.Filter { rippleCursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.96) }
 	//filters := []screen.Filter { rippleCursor, screen.NewAfterGlowFilter(.8)  }
 
@@ -91,7 +93,7 @@ func main() {
 
 	go cmdHandler(os.Stdin, events)
 
-	go screen.DisplayRoutine(drivers.GetDriver(960*16), multi, q)
+	go screen.DisplayRoutine(drivers.GetDriver(info.Size*16), multi, info, q)
 
 	x, y := 62,9
 	rippleCursor.SetCursor(x, y)

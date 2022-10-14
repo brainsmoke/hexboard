@@ -99,6 +99,7 @@ func main() {
 	}
 
 	s := screen.NewHexScreen()
+	info := s.Info()
 	s.SetFont(font.GetFont())
 	writeScreen(s)
 	hi := screen.NewBrightness(.4)
@@ -131,7 +132,7 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	rippleCursor := screen.NewRippleCursor(.5)
+	rippleCursor := screen.NewRippleCursor(.5, info)
 	filters := []screen.Filter { rippleCursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.93) }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
@@ -141,7 +142,7 @@ func main() {
 
 	go cmdHandler(os.Stdin, events)
 
-	go screen.DisplayRoutine(drivers.GetDriver(960*16), multi, q)
+	go screen.DisplayRoutine(drivers.GetDriver(info.Size*16), multi, info, q)
 
 	x, y := 62,9
 	rippleCursor.SetCursor(x, y)

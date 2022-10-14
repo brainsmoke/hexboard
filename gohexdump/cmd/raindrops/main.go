@@ -36,6 +36,7 @@ func main() {
 	flag.Parse()
 
 	s := screen.NewHexScreen()
+	info := s.Info()
 
 	s.SetFont(font.GetFont())
 /*
@@ -56,7 +57,7 @@ func main() {
 */
 	multi, screenChan := screen.NewMultiScreen()
 
-	filters := []screen.Filter { screen.NewRaindropFilter(), screen.DefaultGamma() }
+	filters := []screen.Filter { screen.NewRaindropFilter(info), screen.DefaultGamma() }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
 
@@ -65,7 +66,7 @@ func main() {
 
 	go cmdHandler(os.Stdin, events)
 
-	go screen.DisplayRoutine(drivers.GetDriver(960*16), multi, q)
+	go screen.DisplayRoutine(drivers.GetDriver(info.Size*16), multi, info, q)
 
 	loop: for {
 		select {

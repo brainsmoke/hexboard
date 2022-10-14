@@ -104,6 +104,7 @@ func main() {
 	}
 
 	s := screen.NewHexScreen()
+	info := s.Info()
 
 	s.SetFont(font.GetFont())
 
@@ -118,7 +119,7 @@ func main() {
 
 	go cmdHandler(os.Stdin, events)
 
-	go screen.DisplayRoutine(drivers.GetDriver(960*16), multi, q)
+	go screen.DisplayRoutine(drivers.GetDriver(info.Size*16), multi, info, q)
 
 	normal = screen.NewBrightness(.1)
 	mid = screen.NewBrightness(.2)

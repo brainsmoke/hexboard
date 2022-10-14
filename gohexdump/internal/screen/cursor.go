@@ -16,18 +16,20 @@ type RippleCursor struct {
 	mutex sync.Mutex
 	index int
 	blinkCountdown int
+	info *ScreenInfo
 }
 
-func NewRippleCursor(brightness float64) Cursor {
+func NewRippleCursor(brightness float64, info *ScreenInfo) Cursor {
 	r := new(RippleCursor)
-	r.filter = NewRippleFilter(brightness, nil)
+	r.info = info
+	r.filter = NewRippleFilter(brightness, nil, info)
     return r
 }
 
 func (r *RippleCursor) SetCursor(x, y int) {
 
 	r.mutex.Lock()
-	r.index = screenInfo.GetIndex(x, y)
+	r.index = r.info.GetIndex(x, y)
 	r.blinkCountdown = 100
 	r.mutex.Unlock()
 	if r.index != -1 {

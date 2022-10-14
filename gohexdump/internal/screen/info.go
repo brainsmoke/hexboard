@@ -44,6 +44,7 @@ type SegmentInfo struct {
 	Segment int
 }
 
+
 type ScreenInfo struct {
 
 	Size, Columns, Rows int // Size != Columns * Rows, since there are gaps
@@ -53,18 +54,77 @@ type ScreenInfo struct {
 	indices []int
 }
 
-var usedColumns = []int{
-	0, 1, 2, 3, 4, 5, 6, 7, // offset
-	13, 14,   16, 17,   19, 20,   22, 23,   25, 26,   28, 29,   31, 32,   34, 35, // hex bytes
-	41, 42,   44, 45,   47, 48,   50, 51,   53, 54,   56, 57,   59, 60,   62, 63, // hex bytes
-	69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, // ascii representations
+type screenPos struct { column, row int }
+
+type Panel struct {
+
+	digitPositions []screenPos
 }
 
-func GetScreenInfo() *ScreenInfo {
+var HorizontalPanel = &Panel{
+	digitPositions : []screenPos{
+		{ 0, 0}, { 1, 0}, { 2, 0}, { 3, 0}, { 4, 0}, { 5, 0}, { 6, 0}, { 7, 0},
+		{ 8, 0}, { 9, 0}, {10, 0}, {11, 0}, {12, 0}, {13, 0}, {14, 0}, {15, 0},
+		{16, 0}, {17, 0}, {18, 0}, {19, 0}, {20, 0}, {21, 0}, {22, 0}, {23, 0},
+		{24, 0}, {25, 0}, {26, 0}, {27, 0}, {28, 0}, {29, 0}, {30, 0}, {31, 0},
+	},
+}
 
-	size := 960
-	columns := 85
-	rows := 18
+var VerticalPanel = &Panel{
+	digitPositions : []screenPos{
+		{ 0, 0}, { 1, 0},
+		{ 0, 1}, { 1, 1},
+		{ 0, 2}, { 1, 2},
+		{ 0, 3}, { 1, 3},
+		{ 0, 4}, { 1, 4},
+		{ 0, 5}, { 1, 5},
+		{ 0, 6}, { 1, 6},
+		{ 0, 7}, { 1, 7},
+		{ 0, 8}, { 1, 8},
+		{ 0, 9}, { 1, 9},
+		{ 0,10}, { 1,10},
+		{ 0,11}, { 1,11},
+		{ 0,12}, { 1,12},
+		{ 0,13}, { 1,13},
+		{ 0,14}, { 1,14},
+		{ 0,15}, { 1,15},
+	},
+}
+
+type PanelPosition struct {
+
+	Column, Row int
+	Type *Panel
+}
+
+type ScreenConfiguration []PanelPosition
+
+
+func GetScreenInfo(conf ScreenConfiguration) *ScreenInfo {
+
+	columns := 0
+	rows := 0
+	size := 0
+
+	for _, panel := range conf {
+		for _, pos := range panel.Type.digitPositions {
+			x, y := panel.Column + pos.column, panel.Row + pos.row
+			if x < 0 {
+				panic("row pos < 0")
+			}
+			if y < 0 {
+				panic("column pos < 0")
+			}
+			if x+1 > columns {
+				columns = x+1
+			}
+			if y+1 > rows {
+				rows = y+1
+			}
+			size += 1
+		}
+	}
+
 	height := float64(rows) * digitSize.Y
 	width  := float64(columns) * digitSize.X
 	digits   := make([]DigitInfo, size)
@@ -75,23 +135,19 @@ func GetScreenInfo() *ScreenInfo {
 		indices[i] = -1
 	}
 
-	var row, column int
 	ix := 0
-	for panel := 0; panel < 30; panel++ {
-		for module := 0; module < 16; module++ {
-			for digit := 0; digit < 2; digit++ {
-				if panel < 28 {
-					row = module+2
-					column = usedColumns[panel*2+digit]
-				} else {
-					row = 0
-					column = 32*(panel-28)+module*2+digit
-				}
-				digits[ix].Column = column
-				digits[ix].Row    = row
-				indices[row*columns + column] = ix
-				ix++
+	for _, panel := range conf {
+		for _, pos := range panel.Type.digitPositions {
+			x, y := panel.Column + pos.column, panel.Row + pos.row
+
+			digits[ix].Column = x
+			digits[ix].Row    = y
+			if indices[y*columns + x] != -1 {
+				panic("panel overlap")
 			}
+
+			indices[y*columns + x] = ix
+			ix += 1
 		}
 	}
 
@@ -135,8 +191,3 @@ func (s *ScreenInfo) GetCoord(column, row int) Vector2 {
 	                 Y: float64(row)    * digitSize.Y + digitLocation.Y }
 }
 
-var screenInfo *ScreenInfo
-
-func init() {
-	screenInfo = GetScreenInfo()
-}

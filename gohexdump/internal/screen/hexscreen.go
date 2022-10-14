@@ -16,6 +16,8 @@ type HexScreen interface {
 	SetFont(font *font.Font)
 	Font() *font.Font
 
+	Info() *ScreenInfo
+
 	SetStyle(s Style)
 	SetStyleAt(s Style, column, row int)
 
@@ -40,25 +42,74 @@ type HexScreen interface {
 
 }
 
+type digit struct {
+	glyph font.Glyph
+	style Style
+}
+
 type hexScreen struct {
 
-	digits [960]struct {
-		glyph font.Glyph
-		style Style
-	}
-	staging[960]struct {
-		glyph font.Glyph
-		style Style
-	}
+	digits []digit
+	staging[]digit
+
 	style Style
 	font *font.Font
 	held bool
 	mutex sync.Mutex
+	info *ScreenInfo
 }
+
+var hexConfig = ScreenConfiguration{
+
+	{  0, 2, VerticalPanel }, // offset
+	{  2, 2, VerticalPanel },
+	{  4, 2, VerticalPanel },
+	{  6, 2, VerticalPanel },
+
+	{ 13, 2, VerticalPanel }, // hex bytes
+	{ 16, 2, VerticalPanel },
+	{ 19, 2, VerticalPanel },
+	{ 22, 2, VerticalPanel },
+	{ 25, 2, VerticalPanel },
+	{ 28, 2, VerticalPanel },
+	{ 31, 2, VerticalPanel },
+	{ 34, 2, VerticalPanel },
+
+	{ 41, 2, VerticalPanel },
+	{ 44, 2, VerticalPanel },
+	{ 47, 2, VerticalPanel },
+	{ 50, 2, VerticalPanel },
+	{ 53, 2, VerticalPanel },
+	{ 56, 2, VerticalPanel },
+	{ 59, 2, VerticalPanel },
+	{ 62, 2, VerticalPanel },
+
+	{ 69, 2, VerticalPanel }, // ascii representations
+	{ 71, 2, VerticalPanel },
+	{ 73, 2, VerticalPanel },
+	{ 75, 2, VerticalPanel },
+	{ 77, 2, VerticalPanel },
+	{ 79, 2, VerticalPanel },
+	{ 81, 2, VerticalPanel },
+	{ 83, 2, VerticalPanel },
+
+	{  0, 0, HorizontalPanel },
+	{ 32, 0, HorizontalPanel },
+
+}
+
+const hexStartRow = 2
+var hexColumns = []int{13,16,19,22,25,28,31,34,41,44,47,50,53,56,59,62}
+const offsetColumn = 0
+const asciiColumn = 69
+
 
 func NewHexScreen() HexScreen {
 
-	return &hexScreen{ style: defaultStyle, font: font.GetFont() }
+	info := GetScreenInfo(hexConfig)
+	digits := make([]digit, info.Size)
+	staging := make([]digit, info.Size)
+	return &hexScreen{ style: defaultStyle, font: font.GetFont(), digits: digits, staging: staging, info: info }
 }
 
 func (t *hexScreen) NextFrame(f *FrameBuffer, old *FrameBuffer, tick uint64) bool {
@@ -74,6 +125,10 @@ func (t *hexScreen) NextFrame(f *FrameBuffer, old *FrameBuffer, tick uint64) boo
 	t.mutex.Unlock()
 
 	return true
+}
+
+func (t *hexScreen) Info() *ScreenInfo {
+	return t.info
 }
 
 func (t *hexScreen) Hold() {
@@ -114,7 +169,7 @@ func (t *hexScreen) SetStyle(s Style) {
 }
 
 func (t *hexScreen) SetStyleAt(s Style, column, row int) {
-	index := screenInfo.GetIndex(column, row)
+	index := t.info.GetIndex(column, row)
 	if index != -1 {
 		t.staging[index].style = s.Apply()
 		t.tryUpdate()
@@ -128,12 +183,12 @@ func (t *hexScreen) WriteRawAt(g []font.Glyph, column, row int) {
 	}
 
 	i := 0
-	loop: for ; row < screenInfo.Rows ; row++ {
-		for ; column < screenInfo.Columns ; column++ {
+	loop: for ; row < t.info.Rows ; row++ {
+		for ; column < t.info.Columns ; column++ {
 			if i >= len(g) {
 				break loop
 			}
-			index := screenInfo.GetIndex(column, row)
+			index := t.info.GetIndex(column, row)
 
 			if index != -1 {
 				s := t.style.Apply()
@@ -160,20 +215,22 @@ func (t *hexScreen) WriteRawTitle(g []font.Glyph, start int) {
 func (t *hexScreen) WriteRawHexField(g []font.Glyph, field int) {
 	twodigits := make([]font.Glyph, 2)
 	copy(twodigits, g)
-	t.WriteRawAt(twodigits, usedColumns[8+2*(field%16)], 2+(field/16))
+	t.WriteRawAt(twodigits, hexColumns[field%16], hexStartRow+(field/16))
 }
 
 func (t *hexScreen) WriteRawAsciiField(g font.Glyph, field int) {
 	g_a := []font.Glyph{ g }
 	if 0 <= field && field < 256 {
-		t.WriteRawAt(g_a,  usedColumns[40+(field%16)], 2+(field/16))
+		t.WriteRawAt(g_a,  asciiColumn+(field%16), hexStartRow+(field/16))
 	}
 }
 
 func (t *hexScreen) WriteRawOffset(g []font.Glyph, line int) {
 	offsetdigits := make([]font.Glyph, 8)
 	copy(offsetdigits, g)
-	t.WriteRawAt(offsetdigits, 0, line+2)
+	if 0 <= line && line < 16 {
+		t.WriteRawAt(offsetdigits, offsetColumn, line+hexStartRow)
+	}
 }
 
 
@@ -201,10 +258,10 @@ func (t *hexScreen) WriteOffset(s string, line int) {
 
 func (t *hexScreen) UpWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
 		row -= 1
 		if row < 0 {
-			row = screenInfo.Rows-1
+			row = t.info.Rows-1
 		}
 	}
 	return column, row
@@ -213,9 +270,9 @@ func (t *hexScreen) UpWrap(column, row int) (int, int) {
 
 func (t *hexScreen) DownWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
 		row += 1
-		if row >= screenInfo.Rows {
+		if row >= t.info.Rows {
 			row = 0
 		}
 	}
@@ -225,10 +282,10 @@ func (t *hexScreen) DownWrap(column, row int) (int, int) {
 
 func (t *hexScreen) LeftWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
 		column -= 1
 		if column < 0 {
-			column = screenInfo.Columns-1
+			column = t.info.Columns-1
 		}
 	}
 	return column, row
@@ -237,9 +294,9 @@ func (t *hexScreen) LeftWrap(column, row int) (int, int) {
 
 func (t *hexScreen) RightWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = screenInfo.GetIndex(column, row) {
+	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
 		column += 1
-		if column >= screenInfo.Columns {
+		if column >= t.info.Columns {
 			column = 0
 		}
 	}

@@ -13,10 +13,10 @@ type Output interface {
 	Write(dst []float64) (int, error)
 }
 
-func DisplayRoutine(out Output, s Screen, quit <-chan bool) {
+func DisplayRoutine(out Output, s Screen, info *ScreenInfo, quit <-chan bool) {
 
 	var counter, prev_counter uint64
-	var frames = []*FrameBuffer { NewFrameBuffer(), NewFrameBuffer() }
+	var frames = []*FrameBuffer { NewFrameBuffer(info.Size*16), NewFrameBuffer(info.Size*16) }
 	cur, old := 0, 1
 
 	if !s.NextFrame(frames[cur], frames[old], counter) {

@@ -18,7 +18,7 @@ func init() {
 
 func getPositions(w, h int) []int{
 
-	info := screen.GetScreenInfo()
+	info := screen.NewHexScreen().Info()
 
 	var positions = make([]int, len(info.Segments))
 

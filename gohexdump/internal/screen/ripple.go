@@ -7,7 +7,7 @@ import (
 )
 
 type RippleCache struct {
-	d [960*16]uint32
+	d []uint32
 	maxD uint32
 	origin Vector2
 }
@@ -23,7 +23,7 @@ func RippleTransform(pos Vector2) Vector2 {
 
 type RippleFilter struct {
 
-	coords [960*16]Vector2
+	coords []Vector2
 
 	cache *RippleCache
 
@@ -33,15 +33,17 @@ type RippleFilter struct {
 	brightness float64
 }
 
-func NewRippleFilter(brightness float64, transform func(Vector2) Vector2) *RippleFilter {
+func NewRippleFilter(brightness float64, transform func(Vector2) Vector2, info *ScreenInfo) *RippleFilter {
+
 	if transform == nil {
 		transform = RippleTransform
 	}
 
 	r := new(RippleFilter)
+	r.coords = make([]Vector2, len(info.Segments))
 	r.brightness = math.Max(0, math.Min(1, brightness))
-	for i := range screenInfo.Segments {
-		r.coords[i] = transform(screenInfo.Segments[i].Position)
+	for i := range info.Segments {
+		r.coords[i] = transform(info.Segments[i].Position)
 	}
     return r
 }
@@ -59,6 +61,7 @@ func (r *RippleFilter) rippleCache(origin Vector2) *RippleCache {
 	if cache == nil || origin != cache.origin {
 
 		cache = new(RippleCache)
+		cache.d = make([]uint32, len(r.coords))
 		cache.origin = origin
 		maxD := uint32(0)
 
