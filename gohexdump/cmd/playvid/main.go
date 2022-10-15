@@ -3,6 +3,7 @@ package main
 
 import (
 	"post6.net/gohexdump/internal/drivers"
+	"post6.net/gohexdump/internal/screen"
 	"os"
 	"io"
 	"time"
@@ -23,9 +24,11 @@ func main() {
 
 	flag.Parse()
 
+	size := screen.NewHexScreen().SegmentCount()
+
 	var gmap [256]float64
-	var buf     [960*16]byte
-	var buf_f64 [960*16]float64
+	var buf     = make([]byte, size)
+	var buf_f64 = make([]float64, size)
 
 	for i := range gmap {
 		v := math.Pow(float64(i)/255, gamma)

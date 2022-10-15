@@ -1,6 +1,11 @@
 
 package screen
 
+import (
+	"sync"
+	"post6.net/gohexdump/internal/font"
+)
+
 type Vector2 struct {
 
 	X, Y float64
@@ -29,32 +34,66 @@ var segmentLocations = []Vector2{
 	{  6.3330000, 14.062   }, // unused (center location)
 }
 
+type ScreenInfo interface {
 
-type DigitInfo struct {
+	DigitCount() int
+	SegmentCount() int
 
-	Column, Row int
-	Position Vector2
-	Segments []SegmentInfo
+	DigitCoord(ix int) Vector2
+	SegmentCoord(ix int) Vector2
+
+	Coords() []Vector2
+
+	Dimensions() Vector2
 }
 
-type SegmentInfo struct {
+type TextScreen interface {
 
-	Position Vector2
-	Digit int
-	Segment int
-}
+	Screen
+	ScreenInfo
 
+	DigitIndex(column, row int) int
+	DigitPosition(ix int) (int, int)
 
-type ScreenInfo struct {
+	Size() (int, int)
+	Rows() int
+	Columns() int
 
-	Size, Columns, Rows int // Size != Columns * Rows, since there are gaps
-	Height, Width float64   // in mm
-	Digits []DigitInfo
-	Segments []SegmentInfo
-	indices []int
+	/* locking model assumes one updater, one renderer */
+	Hold()
+	Update()
+
+	SetFont(font *font.Font)
+	Font() *font.Font
+
+	SetStyle(s Style)
+	SetStyleAt(s Style, column, row int)
+
+	UpWrap(column, row int) (int, int)
+	DownWrap(column, row int) (int, int)
+	LeftWrap(column, row int) (int, int)
+	RightWrap(column, row int) (int, int)
 }
 
 type screenPos struct { column, row int }
+
+type digit struct {
+	glyph font.Glyph
+	style Style
+}
+
+type textScreen struct {
+
+	columns, rows int // Size != Columns * Rows, since there are gaps
+	positions []screenPos
+	indices []int
+	digits, staging []digit
+
+	style Style
+	font *font.Font
+	held bool
+	mutex sync.Mutex
+}
 
 type Panel struct {
 
@@ -100,7 +139,7 @@ type PanelPosition struct {
 type ScreenConfiguration []PanelPosition
 
 
-func GetScreenInfo(conf ScreenConfiguration) *ScreenInfo {
+func (s *textScreen) init(conf ScreenConfiguration) {
 
 	columns := 0
 	rows := 0
@@ -125,11 +164,11 @@ func GetScreenInfo(conf ScreenConfiguration) *ScreenInfo {
 		}
 	}
 
-	height := float64(rows) * digitSize.Y
-	width  := float64(columns) * digitSize.X
-	digits   := make([]DigitInfo, size)
-	segments := make([]SegmentInfo, size*16)
+	positions := make([]screenPos, size)
 	indices := make([]int, rows*columns)
+
+	digits := make([]digit, size)
+	staging := make([]digit, size)
 
 	for i := range indices {
 		indices[i] = -1
@@ -140,8 +179,8 @@ func GetScreenInfo(conf ScreenConfiguration) *ScreenInfo {
 		for _, pos := range panel.Type.digitPositions {
 			x, y := panel.Column + pos.column, panel.Row + pos.row
 
-			digits[ix].Column = x
-			digits[ix].Row    = y
+			positions[ix].column = x
+			positions[ix].row    = y
 			if indices[y*columns + x] != -1 {
 				panic("panel overlap")
 			}
@@ -151,43 +190,189 @@ func GetScreenInfo(conf ScreenConfiguration) *ScreenInfo {
 		}
 	}
 
-	for i := range digits {
 
-		digits[i].Position = Vector2{ X:float64(digits[i].Column) * digitSize.X + digitLocation.X,
-		                              Y:float64(digits[i].Row)    * digitSize.Y + digitLocation.Y }
-
-		s := segments[i*16:i*16+16]
-
-		for j := range s {
-			s[j].Position = Vector2{ X:float64(digits[i].Column) * digitSize.X + segmentLocations[j].X,
-			                         Y:float64(digits[i].Row)    * digitSize.Y + segmentLocations[j].Y }
-			s[j].Digit = i
-			s[j].Segment = j
-		}
-
-		digits[i].Segments = s
-	}
-
-	return &ScreenInfo{
-		Size: size,
-		Columns: columns, Rows: rows,
-		Width: width, Height: height,
-		Digits: digits,
-		Segments: segments,
+	*s = textScreen{
+		columns: columns,
+		rows: rows,
+		positions: positions,
 		indices: indices,
+		digits: digits,
+		staging: staging,
+		font: font.GetFont(),
+		style: defaultStyle,
 	}
 }
 
+func NewTextScreen(conf ScreenConfiguration) TextScreen {
+	s := new(textScreen)
+	s.init(conf)
+	return s
+}
 
-func (s *ScreenInfo) GetIndex(column, row int) int {
-	if row < 0 || row >= s.Rows || column < 0 || column >= s.Columns {
+func (s *textScreen) DigitCount() int {
+	return len(s.positions)
+}
+
+func (s *textScreen) SegmentCount() int {
+	return len(s.positions)*16
+}
+
+func (s *textScreen) Size() (int, int) {
+	return s.columns, s.rows
+}
+
+func (s *textScreen) Rows() int {
+	return s.rows
+}
+
+func (s *textScreen) Columns() int {
+	return s.columns
+}
+
+func (s *textScreen) Dimensions() Vector2 {
+	return Vector2{ float64(s.columns) * digitSize.X, float64(s.rows) * digitSize.Y }
+}
+
+func (s *textScreen) DigitIndex(column, row int) int {
+	if row < 0 || row >= s.rows || column < 0 || column >= s.columns {
 		return -1
 	}
-	return s.indices[row*s.Columns + column]
+	return s.indices[row*s.columns + column]
 }
 
-func (s *ScreenInfo) GetCoord(column, row int) Vector2 {
-	return Vector2 { X: float64(column) * digitSize.X + digitLocation.X,
-	                 Y: float64(row)    * digitSize.Y + digitLocation.Y }
+func (s *textScreen) DigitPosition(ix int) (int, int) {
+	p := s.positions[ix]
+	return p.column, p.row
+}
+
+func (s *textScreen) DigitCoord(ix int) Vector2 {
+	x, y := s.DigitPosition(ix)
+	return Vector2 { X: float64(x) * digitSize.X + digitLocation.X,
+	                 Y: float64(y) * digitSize.Y + digitLocation.Y }
+}
+
+func (s *textScreen) SegmentCoord(ix int) Vector2 {
+	v := s.DigitCoord(ix>>4)
+	d := segmentLocations[ix&0xf]
+	return Vector2{ v.X+d.X, v.Y+d.Y }
+}
+
+
+func (s *textScreen) Coords() []Vector2 {
+	coords := make([]Vector2, len(s.positions))
+	for i := range coords {
+		coords[i] = s.SegmentCoord(i)
+	}
+
+	return coords
+}
+
+func (s *textScreen) NextFrame(f, old *FrameBuffer, tick uint64) bool {
+
+	s.mutex.Lock()
+	for i := range s.digits {
+		style := s.digits[i].style
+		if style == nil {
+			style = defaultStyle
+		}
+		style.Render(f.digits[i], s.digits[i].glyph, i, tick)
+	}
+	s.mutex.Unlock()
+
+	return true
+}
+
+
+func (s *textScreen) Hold() {
+	s.held = true
+}
+
+func (s *textScreen) Update() {
+	s.held = false
+
+	s.mutex.Lock()
+	for i := range s.staging {
+		style, glyph := s.staging[i].style, s.staging[i].glyph
+		if style != nil {
+			s.digits[i].style = style
+			s.digits[i].glyph = glyph
+		}
+		s.staging[i].style = nil
+	}
+	s.mutex.Unlock()
+}
+
+func (s *textScreen) tryUpdate() {
+	if !s.held {
+		s.Update()
+	}
+}
+
+func (s *textScreen) SetFont(font *font.Font) {
+	s.font = font
+}
+
+func (s *textScreen) Font() *font.Font {
+	return s.font
+}
+
+func (s *textScreen) SetStyle(style Style) {
+	s.style = style
+}
+
+func (s *textScreen) SetStyleAt(style Style, column, row int) {
+	index := s.DigitIndex(column, row)
+	if index != -1 {
+		s.staging[index].style = style.Apply()
+		s.tryUpdate()
+	}
+}
+
+
+func (s *textScreen) UpWrap(column, row int) (int, int) {
+
+	for index := -1; index == -1; index = s.DigitIndex(column, row) {
+		row -= 1
+		if row < 0 {
+			row = s.rows-1
+		}
+	}
+	return column, row
+}
+
+
+func (s *textScreen) DownWrap(column, row int) (int, int) {
+
+	for index := -1; index == -1; index = s.DigitIndex(column, row) {
+		row += 1
+		if row >= s.rows {
+			row = 0
+		}
+	}
+	return column, row
+}
+
+
+func (s *textScreen) LeftWrap(column, row int) (int, int) {
+
+	for index := -1; index == -1; index = s.DigitIndex(column, row) {
+		column -= 1
+		if column < 0 {
+			column = s.columns-1
+		}
+	}
+	return column, row
+}
+
+
+func (s *textScreen) RightWrap(column, row int) (int, int) {
+
+	for index := -1; index == -1; index = s.DigitIndex(column, row) {
+		column += 1
+		if column >= s.columns {
+			column = 0
+		}
+	}
+	return column, row
 }
 

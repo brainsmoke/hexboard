@@ -33,17 +33,17 @@ type RippleFilter struct {
 	brightness float64
 }
 
-func NewRippleFilter(brightness float64, transform func(Vector2) Vector2, info *ScreenInfo) *RippleFilter {
+func NewRippleFilter(brightness float64, transform func(Vector2) Vector2, screen TextScreen) *RippleFilter {
 
 	if transform == nil {
 		transform = RippleTransform
 	}
 
 	r := new(RippleFilter)
-	r.coords = make([]Vector2, len(info.Segments))
+	r.coords = make([]Vector2, screen.SegmentCount())
 	r.brightness = math.Max(0, math.Min(1, brightness))
-	for i := range info.Segments {
-		r.coords[i] = transform(info.Segments[i].Position)
+	for i := range r.coords {
+		r.coords[i] = transform(screen.SegmentCoord(i))
 	}
     return r
 }

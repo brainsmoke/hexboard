@@ -18,14 +18,14 @@ func init() {
 
 func getPositions(w, h int) []int{
 
-	info := screen.NewHexScreen().Info()
+	coords := screen.NewHexScreen().Coords()
 
-	var positions = make([]int, len(info.Segments))
+	var positions = make([]int, len(coords))
 
 	lx, ly, hx, hy := 9001., 9001., -1., -1.
 
-	for _,seg := range info.Segments {
-		x, y := seg.Position.X, seg.Position.Y
+	for _,pos := range coords {
+		x, y := pos.X, pos.Y
 
 		if x < lx {
 			lx = x
@@ -44,8 +44,8 @@ func getPositions(w, h int) []int{
 	fx := float64(w-1)/(hx-lx)
 	fy := float64(h-1)/(hy-ly)
 
-	 for i,seg := range info.Segments {
-		x, y := int((seg.Position.X-lx)*fx), int((seg.Position.Y-ly)*fy)
+	 for i,pos := range coords {
+		x, y := int((pos.X-lx)*fx), int((pos.Y-ly)*fy)
 		if x > (w-1) {
 			x = w-1
 		}

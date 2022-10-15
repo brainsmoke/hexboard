@@ -2,29 +2,11 @@
 package screen
 
 import (
-	"sync"
 	"post6.net/gohexdump/internal/font"
 )
 
 type HexScreen interface {
-	Screen
-
-	/* locking model assumes one updater, one renderer */
-	Hold()
-	Update()
-
-	SetFont(font *font.Font)
-	Font() *font.Font
-
-	Info() *ScreenInfo
-
-	SetStyle(s Style)
-	SetStyleAt(s Style, column, row int)
-
-	UpWrap(column, row int) (int, int)
-	DownWrap(column, row int) (int, int)
-	LeftWrap(column, row int) (int, int)
-	RightWrap(column, row int) (int, int)
+	TextScreen
 
 	WriteRawAt(g []font.Glyph, column, row int)
 	WriteAt(s string, column, row int)
@@ -42,21 +24,9 @@ type HexScreen interface {
 
 }
 
-type digit struct {
-	glyph font.Glyph
-	style Style
-}
-
 type hexScreen struct {
+	textScreen
 
-	digits []digit
-	staging[]digit
-
-	style Style
-	font *font.Font
-	held bool
-	mutex sync.Mutex
-	info *ScreenInfo
 }
 
 var hexConfig = ScreenConfiguration{
@@ -106,74 +76,9 @@ const asciiColumn = 69
 
 func NewHexScreen() HexScreen {
 
-	info := GetScreenInfo(hexConfig)
-	digits := make([]digit, info.Size)
-	staging := make([]digit, info.Size)
-	return &hexScreen{ style: defaultStyle, font: font.GetFont(), digits: digits, staging: staging, info: info }
-}
-
-func (t *hexScreen) NextFrame(f *FrameBuffer, old *FrameBuffer, tick uint64) bool {
-
-	t.mutex.Lock()
-	for i := range t.digits {
-		s := t.digits[i].style
-		if s == nil {
-			s = defaultStyle
-		}
-		s.Render(f.digits[i], t.digits[i].glyph, i, tick)
-	}
-	t.mutex.Unlock()
-
-	return true
-}
-
-func (t *hexScreen) Info() *ScreenInfo {
-	return t.info
-}
-
-func (t *hexScreen) Hold() {
-	t.held = true
-}
-
-func (t *hexScreen) Update() {
-	t.held = false
-
-	t.mutex.Lock()
-	for i := range t.staging {
-		style, glyph := t.staging[i].style, t.staging[i].glyph
-		if style != nil {
-			t.digits[i].style = style
-			t.digits[i].glyph = glyph
-		}
-		t.staging[i].style = nil
-	}
-	t.mutex.Unlock()
-}
-
-func (t *hexScreen) tryUpdate() {
-	if !t.held {
-		t.Update()
-	}
-}
-
-func (t *hexScreen) SetFont(font *font.Font) {
-	t.font = font
-}
-
-func (t *hexScreen) Font() *font.Font {
-	return t.font
-}
-
-func (t *hexScreen) SetStyle(s Style) {
-	t.style = s
-}
-
-func (t *hexScreen) SetStyleAt(s Style, column, row int) {
-	index := t.info.GetIndex(column, row)
-	if index != -1 {
-		t.staging[index].style = s.Apply()
-		t.tryUpdate()
-	}
+	s := new(hexScreen)
+	s.init(hexConfig)
+	return s
 }
 
 func (t *hexScreen) WriteRawAt(g []font.Glyph, column, row int) {
@@ -183,12 +88,12 @@ func (t *hexScreen) WriteRawAt(g []font.Glyph, column, row int) {
 	}
 
 	i := 0
-	loop: for ; row < t.info.Rows ; row++ {
-		for ; column < t.info.Columns ; column++ {
+	loop: for ; row < t.rows ; row++ {
+		for ; column < t.columns ; column++ {
 			if i >= len(g) {
 				break loop
 			}
-			index := t.info.GetIndex(column, row)
+			index := t.DigitIndex(column, row)
 
 			if index != -1 {
 				s := t.style.Apply()
@@ -255,51 +160,4 @@ func (t *hexScreen) WriteOffset(s string, line int) {
 	t.WriteRawOffset(t.font.Glyphs(s), line)
 }
 
-
-func (t *hexScreen) UpWrap(column, row int) (int, int) {
-
-	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
-		row -= 1
-		if row < 0 {
-			row = t.info.Rows-1
-		}
-	}
-	return column, row
-}
-
-
-func (t *hexScreen) DownWrap(column, row int) (int, int) {
-
-	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
-		row += 1
-		if row >= t.info.Rows {
-			row = 0
-		}
-	}
-	return column, row
-}
-
-
-func (t *hexScreen) LeftWrap(column, row int) (int, int) {
-
-	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
-		column -= 1
-		if column < 0 {
-			column = t.info.Columns-1
-		}
-	}
-	return column, row
-}
-
-
-func (t *hexScreen) RightWrap(column, row int) (int, int) {
-
-	for index := -1; index == -1; index = t.info.GetIndex(column, row) {
-		column += 1
-		if column >= t.info.Columns {
-			column = 0
-		}
-	}
-	return column, row
-}
 

@@ -3,7 +3,7 @@ package screen
 
 type Screen interface {
 
-	NextFrame(f *FrameBuffer, old *FrameBuffer, tick uint64) bool
+	NextFrame(f, old *FrameBuffer, tick uint64) bool
 }
 
 type MultiScreen struct {
@@ -16,7 +16,7 @@ func NewMultiScreen() (Screen, chan<-Screen) {
 	return &MultiScreen{ c: c }, c
 }
 
-func (m *MultiScreen) NextFrame(f *FrameBuffer, old *FrameBuffer, tick uint64) bool {
+func (m *MultiScreen) NextFrame(f, old *FrameBuffer, tick uint64) bool {
 	var ok bool
 
 	if (m.s == nil) {
@@ -52,7 +52,7 @@ func AfterGlow(s Screen, factor float64) Screen {
 	return NewFilterScreen(s, []Filter{ NewAfterGlowFilter(factor) })
 }
 
-func (s *filterScreen) NextFrame(f *FrameBuffer, old *FrameBuffer, tick uint64) bool {
+func (s *filterScreen) NextFrame(f, old *FrameBuffer, tick uint64) bool {
 
 	if !s.s.NextFrame(f, old, tick) {
 		return false

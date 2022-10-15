@@ -12,11 +12,11 @@ type raindrop struct {
 	yPos, ySpeed float64
 	brightness float64
 	ripple *RippleFilter
-	info *ScreenInfo
+	screen TextScreen
 }
 
-func newRaindrop(column int, ripple *RippleFilter, info *ScreenInfo) *raindrop {
-	drop := &raindrop{ column: column, ripple: ripple, info: info }
+func newRaindrop(column int, ripple *RippleFilter, screen TextScreen) *raindrop {
+	drop := &raindrop{ column: column, ripple: ripple, screen: screen }
 	drop.reset()
 	return drop
 }
@@ -25,7 +25,7 @@ var columns = [...]int{ 0, 3, 6,    13, 16, 19, 22, 25, 28, 31, 34,    41, 44, 4
 
 func (d *raindrop) reset() {
 
-	d.endRow = 6+rand.Intn(d.info.Rows*3)
+	d.endRow = 6+rand.Intn(d.screen.Rows()*3)
 	d.yPos = float64(-rand.Intn(60))
 	d.ySpeed = float64(20+d.endRow)/float64(256)
 	d.brightness = .1 + .1*float64(rand.Intn(5))
@@ -37,7 +37,7 @@ func (d *raindrop) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 	oldRow := int(math.Floor(oldPos))
 	newRow := int(math.Floor(newPos))
 
-	if newRow > d.info.Rows {
+	if newRow > d.screen.Rows() {
 		d.reset()
 		return
 	}
@@ -48,7 +48,7 @@ func (d *raindrop) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 			newRow -= 1
 		} else {
 			if oldRow == d.endRow {
-				oldIndex := d.info.GetIndex(d.column, oldRow)
+				oldIndex := d.screen.DigitIndex(d.column, oldRow)
 				if oldIndex !=-1 {
 					pa, pb := d.ripple.coords[oldIndex*16+3], d.ripple.coords[oldIndex*16+16+3]
 					p := Vector2 { X: (pa.X+pb.X)/2, Y : (pa.Y+pb.Y)/2 }
@@ -61,7 +61,7 @@ func (d *raindrop) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 	}
 	if oldRow != newRow || math.Floor(oldPos+.25) != math.Floor(newPos+.25) {
 
-		index := d.info.GetIndex(d.column, newRow)
+		index := d.screen.DigitIndex(d.column, newRow)
 
 		if index != -1 {
 			b := d.brightness
@@ -90,13 +90,13 @@ func symmetricTransform(pos Vector2) Vector2 {
 }
 
 
-func NewRaindropFilter(info *ScreenInfo) Filter {
+func NewRaindropFilter(screen TextScreen) Filter {
 	f := new(RaindropFilter)
 	f.drops = make([]*raindrop, len(columns))
-	f.ripple = NewRippleFilter(.1, symmetricTransform, info)
-	f.buf = NewFrameBuffer(info.Size*16)
+	f.ripple = NewRippleFilter(.1, symmetricTransform, screen)
+	f.buf = NewFrameBuffer(screen.SegmentCount())
 	for i := range f.drops {
-		f.drops[i] = newRaindrop(columns[i], f.ripple, info)
+		f.drops[i] = newRaindrop(columns[i], f.ripple, screen)
 	}
 	return f
 }
