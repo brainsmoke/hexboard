@@ -19,10 +19,10 @@ type RippleCursor struct {
 	screen TextScreen
 }
 
-func NewRippleCursor(brightness float64, screen TextScreen) Cursor {
+func NewRippleCursor(brightness float64, transform func(Vector2) Vector2, screen TextScreen) Cursor {
 	r := new(RippleCursor)
 	r.screen = screen
-	r.filter = NewRippleFilter(brightness, nil, screen)
+	r.filter = NewRippleFilter(brightness, transform, screen)
     return r
 }
 
