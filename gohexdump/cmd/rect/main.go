@@ -5,6 +5,8 @@ import (
 	"post6.net/gohexdump/internal/screen"
 	"post6.net/gohexdump/internal/font"
 	"post6.net/gohexdump/internal/drivers"
+	"post6.net/gohexdump/internal/util/keys"
+
 	"os"
 //	"fmt"
 //	"bufio"
@@ -12,41 +14,9 @@ import (
 //	"time"
 	"strings"
 	"runtime/pprof"
-	"golang.org/x/term"
-)
-
-const (
-	ctrlC = 3
-	ctrlD = 4
-	enter = 13
-	escape = 27
-	backspace = 127
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-
-func rawKeys(file *os.File, keys chan<- rune) {
-
-	fd := int(file.Fd())
-
-	oldState, err := term.MakeRaw(fd)
-	if err != nil {
-		panic(err)
-	}
-
-	for {
-		var buf [1]byte
-		_, err := file.Read(buf[0:1])
-		c := buf[0]
-		if err != nil || c == ctrlD || c == ctrlC {
-			break
-		}
-		keys <- rune(c)
-	}
-
-	term.Restore(fd, oldState)
-	close(keys)
-}
 
 func transform(pos screen.Vector2) screen.Vector2 {
 	return screen.Vector2 { X: pos.X, Y: pos.Y }
@@ -72,7 +42,7 @@ func main() {
 	}
 
 	q := make(chan bool)
-	keys := make(chan rune)
+	ch := make(chan byte)
 
 	s := screen.NewTextScreen(conf)
 
@@ -88,7 +58,7 @@ func main() {
 
 	go screen.DisplayRoutine(drivers.GetDriver(s.SegmentCount()), multi, s, q)
 
-	go rawKeys(os.Stdin, keys)
+	go keys.Raw(os.Stdin, ch)
 
 	var err error
 	x, y := 0,0
@@ -96,14 +66,14 @@ func main() {
 
 	loop: for {
 		select {
-			case key, ok := <-keys:
+			case key, ok := <-ch:
 				if !ok {
 					break loop
 				}
 				switch key {
-					case enter:
+					case keys.Enter:
 						x, y, err = s.Down(0, y)
-					case backspace:
+					case keys.Backspace:
 
 						x, y, err = s.Previous(x, y)
 
@@ -112,14 +82,22 @@ func main() {
 						}
 						err = nil
 
+					case keys.Up:
+						x, y, _ = s.Up(x, y)
+					case keys.Down:
+						x, y, _ = s.Down(x, y)
+					case keys.Left:
+						x, y, _ = s.Left(x, y)
+					case keys.Right:
+						x, y, _ = s.Right(x, y)
 					default:
-print(" (",key,") ")
+						if key < 32 || key > 126 { print(" (",key,") ") }
 						c := strings.ToUpper(string(key))
 						x, y, err = s.WriteAt(c, x, y)
 				}
 				if err != nil {
 					s.Scroll(0,1)
-					x, y = 0, y
+					x, y, err = 0, y, nil
 				}
 				cursor.SetCursor(x, y)
 		}

@@ -516,7 +516,7 @@ func (s *textScreen) Left(column, row int) (int, int, error) {
 	if row >= 0 && row < s.rows {
 		for x := clip.IntMin(column-1, s.columns-1) ; x >= 0 ; x-=1 {
 			if s.indices[row*s.columns + x] != -1 {
-				return row, x, nil
+				return x, row, nil
 			}
 		}
 	}
@@ -528,7 +528,7 @@ func (s *textScreen) Right(column, row int) (int, int, error) {
 	if row >= 0 && row < s.rows {
 		for x := clip.IntMax(column+1, 0) ; x < s.columns ; x+=1 {
 			if s.indices[row*s.columns + x] != -1 {
-				return row, x, nil
+				return x, row, nil
 			}
 		}
 	}
