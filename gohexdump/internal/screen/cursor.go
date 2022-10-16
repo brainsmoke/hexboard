@@ -3,6 +3,7 @@ package screen
 
 import (
 	"sync"
+	"math"
 )
 
 type Cursor interface {
@@ -17,19 +18,22 @@ type RippleCursor struct {
 	index int
 	blinkCountdown int
 	screen TextScreen
+	brightness float64
 }
 
-func NewRippleCursor(brightness float64, transform func(Vector2) Vector2, screen TextScreen) Cursor {
+func NewRippleCursor(cursorBrightness, rippleBrightness float64, transform func(Vector2) Vector2, screen TextScreen) Cursor {
 	r := new(RippleCursor)
 	r.screen = screen
-	r.filter = NewRippleFilter(brightness, transform, screen)
+	r.filter = NewRippleFilter(rippleBrightness, transform, screen)
+	r.brightness = math.Max(0, math.Min(1, cursorBrightness))
     return r
 }
 
-func NewCursor(screen TextScreen) Cursor {
+func NewCursor(brightness float64, screen TextScreen) Cursor {
 	r := new(RippleCursor)
 	r.screen = screen
 	r.filter = nil
+	r.brightness = math.Max(0, math.Min(1, brightness))
     return r
 }
 
@@ -53,9 +57,9 @@ func (r *RippleCursor) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 	r.mutex.Unlock()
 
 	if index != -1 && countdown < 100 {
-		b := 1.
+		b := r.brightness
 		if countdown > 90 {
-			b -= float64(countdown-90)/20.
+			b *= (1-float64(countdown-90)/20.)
 		}
 		for i:=0; i<14; i++ {
 			if f.frame[index*16 + i] < b {

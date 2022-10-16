@@ -81,7 +81,7 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	cursor := screen.NewCursor(s)
+	cursor := screen.NewCursor(1, s)
 	filters := []screen.Filter { cursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.85) }
 
 	screenChan <- screen.NewFilterScreen(s, filters)

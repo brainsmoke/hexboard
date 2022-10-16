@@ -81,8 +81,8 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	rippleCursor := screen.NewRippleCursor(.2, transform, s)
-//	rippleCursor := screen.NewRippleCursor(.5, nil, s)
+	rippleCursor := screen.NewRippleCursor(1, .2, transform, s)
+//	rippleCursor := screen.NewRippleCursor(1, .5, nil, s)
 	filters := []screen.Filter { rippleCursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.85) }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
