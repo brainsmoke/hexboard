@@ -115,8 +115,8 @@ func (r *RippleFilter) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 		//third := full/3
 		r.ripples[j].count+=1
 		for i, d := range r.ripples[j].cache.d {
-			w := int(c)-int(d)
-			if w >= 0 && w < int(len(ripw)) {
+			w := c-d
+			if w < uint32(len(ripw)) {
 				x := full * ripw[w]
 				f.frame[i] += x
 			}
@@ -127,7 +127,7 @@ func (r *RippleFilter) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 
 	r.mutex.Lock()
 	for j:=l-1; j >= 0; j-- {
-		if r.ripples[j].count > r.ripples[j].cache.maxD + 30 {
+		if r.ripples[j].count > r.ripples[j].cache.maxD + uint32(len(ripw)) {
 			r.ripples[j] = r.ripples[l-1]
 			l--
 		}
