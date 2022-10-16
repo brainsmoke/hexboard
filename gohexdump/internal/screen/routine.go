@@ -4,9 +4,18 @@ package screen
 import (
 	"time"
 	"fmt"
+	"flag"
 )
 
 const Fps = 60
+
+var verbose bool
+
+func init() {
+
+	flag.BoolVar(&verbose, "verbose", false, "verbose output")
+}
+
 
 type Output interface {
 
@@ -24,6 +33,7 @@ func DisplayRoutine(out Output, s Screen, info ScreenInfo, quit <-chan bool) {
 	}
 
 	tick := time.NewTicker(time.Second / time.Duration(Fps))
+
 	seconds := time.NewTicker(time.Second)
 
 	loop: for {
@@ -45,7 +55,9 @@ func DisplayRoutine(out Output, s Screen, info ScreenInfo, quit <-chan bool) {
 				}
 
 			case <-seconds.C:
-				fmt.Printf("fps: %d\n", counter-prev_counter)
+				if verbose {
+					fmt.Printf("fps: %d\n", counter-prev_counter)
+				}
 				prev_counter = counter
 		}
 	}

@@ -8,9 +8,6 @@ import (
 type HexScreen interface {
 	TextScreen
 
-	WriteRawAt(g []font.Glyph, column, row int)
-	WriteAt(s string, column, row int)
-
 	WriteRawTitle(g []font.Glyph, start int)
 	WriteRawHexField(g []font.Glyph, field int)
 	WriteRawAsciiField(g font.Glyph, field int)
@@ -29,7 +26,7 @@ type hexScreen struct {
 
 }
 
-var hexConfig = ScreenConfiguration{
+var hexConfig = Configuration{
 
 	{  0, 2, VerticalPanel }, // offset
 	{  2, 2, VerticalPanel },
@@ -81,30 +78,6 @@ func NewHexScreen() HexScreen {
 	return s
 }
 
-func (t *hexScreen) WriteRawAt(g []font.Glyph, column, row int) {
-
-	if column < 0 || row < 0 {
-		return
-	}
-
-	i := 0
-	loop: for ; row < t.rows ; row++ {
-		for ; column < t.columns ; column++ {
-			if i >= len(g) {
-				break loop
-			}
-			index := t.DigitIndex(column, row)
-
-			if index != -1 {
-				s := t.style.Apply()
-				t.staging[index].glyph = g[i]
-				t.staging[index].style = s
-				i++
-			}
-		}
-	}
-	t.tryUpdate()
-}
 
 func (t *hexScreen) WriteRawTitle(g []font.Glyph, start int) {
 	if start < 0 || start >= 64 {
@@ -138,10 +111,6 @@ func (t *hexScreen) WriteRawOffset(g []font.Glyph, line int) {
 	}
 }
 
-
-func (t *hexScreen) WriteAt(s string, column, row int) {
-	t.WriteRawAt(t.font.Glyphs(s), column, row)
-}
 
 func (t *hexScreen) WriteTitle(s string, start int) {
 	t.WriteRawTitle(t.font.Glyphs(s), start)

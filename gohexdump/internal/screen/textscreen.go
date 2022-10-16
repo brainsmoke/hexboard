@@ -4,6 +4,8 @@ package screen
 import (
 	"sync"
 	"post6.net/gohexdump/internal/font"
+	"post6.net/gohexdump/internal/util/clip"
+	"errors"
 )
 
 type Vector2 struct {
@@ -69,10 +71,30 @@ type TextScreen interface {
 	SetStyle(s Style)
 	SetStyleAt(s Style, column, row int)
 
+	WriteRawAt(g []font.Glyph, column, row int) (int, int, error)
+	WriteAt(s string, column, row int) (int, int, error)
+
+	First() (int, int)
+	Last() (int, int)
+
+	Next(column, row int) (int, int, error)
+	Previous(column, row int) (int, int, error)
+
+	NextWrap(column, row int) (int, int)
+	PreviousWrap(column, row int) (int, int)
+
+	Up(column, row int) (int, int, error)
+	Down(column, row int) (int, int, error)
+	Left(column, row int) (int, int, error)
+	Right(column, row int) (int, int, error)
+
 	UpWrap(column, row int) (int, int)
 	DownWrap(column, row int) (int, int)
 	LeftWrap(column, row int) (int, int)
 	RightWrap(column, row int) (int, int)
+
+	Scroll(right, down int) /* only makes sense for rectangular screens */
+	Clear()
 }
 
 type screenPos struct { column, row int }
@@ -136,10 +158,10 @@ type PanelPosition struct {
 	Type *Panel
 }
 
-type ScreenConfiguration []PanelPosition
+type Configuration []PanelPosition
 
 
-func (s *textScreen) init(conf ScreenConfiguration) {
+func (s *textScreen) init(conf Configuration) {
 
 	columns := 0
 	rows := 0
@@ -190,7 +212,6 @@ func (s *textScreen) init(conf ScreenConfiguration) {
 		}
 	}
 
-
 	*s = textScreen{
 		columns: columns,
 		rows: rows,
@@ -203,7 +224,7 @@ func (s *textScreen) init(conf ScreenConfiguration) {
 	}
 }
 
-func NewTextScreen(conf ScreenConfiguration) TextScreen {
+func NewTextScreen(conf Configuration) TextScreen {
 	s := new(textScreen)
 	s.init(conf)
 	return s
@@ -293,11 +314,11 @@ func (s *textScreen) Update() {
 	s.mutex.Lock()
 	for i := range s.staging {
 		style, glyph := s.staging[i].style, s.staging[i].glyph
-		if style != nil {
+//		if style != nil {
 			s.digits[i].style = style
 			s.digits[i].glyph = glyph
-		}
-		s.staging[i].style = nil
+//		}
+//		s.staging[i].style = nil
 	}
 	s.mutex.Unlock()
 }
@@ -328,51 +349,238 @@ func (s *textScreen) SetStyleAt(style Style, column, row int) {
 	}
 }
 
+func (s *textScreen) WriteAt(str string, column, row int) (int, int, error) {
+	return s.WriteRawAt(s.font.Glyphs(str), column, row)
+}
+
+func (s *textScreen) WriteRawAt(g []font.Glyph, column, row int) (int, int, error) {
+
+	x, y, err := s.Next(column-1, row)
+
+	for _, glyph := range g {
+
+		if err != nil {
+			break
+		}
+		index := s.DigitIndex(column, row)
+		s.staging[index].glyph = glyph
+		s.staging[index].style = s.style.Apply()
+		x, y, err = s.Next(x, y)
+	}
+	s.tryUpdate()
+	return x, y, err
+}
+
+func (s * textScreen) Scroll(right, down int) {
+
+	if right == 0 && down == 0 {
+		return
+	}
+
+	startx, starty, endx, endy, dx, dy := 0, 0, s.columns, s.rows, 1, 1
+
+	if right < 0 {
+		startx, endx, dx = endx-1, -1, -1
+	}
+	if down < 0 {
+		starty, endy, dy = endy-1, -1, -1
+	}
+
+	var empty font.Glyph
+
+	for y := starty; y < endy; y += dy {
+		for x := startx; x < endx; x += dx {
+			destIndex := s.DigitIndex(x, y)
+			if destIndex == -1 {
+				continue
+			}
+			srcIndex := s.DigitIndex(x+right, y+down)
+			g, style := empty, Style(nil)
+			if srcIndex != -1 {
+				g = s.staging[srcIndex].glyph
+				style = s.staging[srcIndex].style
+			}
+
+			s.staging[destIndex].glyph = g
+			s.staging[destIndex].style = style
+		}
+	}
+
+	s.tryUpdate()
+}
+
+func (s * textScreen) Clear() {
+
+	var empty font.Glyph
+	for i := range s.staging {
+		s.staging[i].glyph = empty
+		s.staging[i].style = s.style
+	}
+}
+
+var noSuchField = errors.New("no such field")
+
+func (s *textScreen) First() (int, int) {
+
+	x,y,err := s.Next(-1, 0)
+	if err == nil {
+		return x, y
+	}
+	panic(err)
+}
+
+func (s *textScreen) Last() (int, int) {
+
+	x, y, err := s.Next(-1, 0)
+	if err == nil {
+		return x, y
+	}
+	panic(err)
+}
+
+func (s *textScreen) Next(column, row int) (int, int, error) {
+
+	xstart := clip.IntMax(column+1, 0)
+	ystart := clip.IntMax(row, 0)
+
+	for y := ystart ; y < s.rows ; y+=1 {
+		for x := xstart ; x < s.columns ; x+=1 {
+			if s.indices[y*s.columns + x] != -1 {
+				return x, y, nil
+			}
+		}
+		xstart = 0
+	}
+	return column, row, noSuchField
+}
+
+func (s *textScreen) Previous(column, row int) (int, int, error) {
+
+	xstart := clip.IntMin(column-1, s.columns-1)
+	ystart := clip.IntMin(row, s.rows-1)
+
+	for y := ystart ; y >= 0 ; y-=1 {
+		for x := xstart ; x >= 0 ; x-=1 {
+			if s.indices[y*s.columns + x] != -1 {
+				return x, y, nil
+			}
+		}
+		xstart = s.columns-1
+	}
+	return column, row, noSuchField
+}
+
+
+func (s *textScreen) NextWrap(column, row int) (int, int) {
+	x, y, err := s.Next(column, row)
+	if err == nil {
+		return x, y
+	}
+	return s.First()
+}
+
+func (s *textScreen) PreviousWrap(column, row int) (int, int) {
+	x, y, err := s.Previous(column, row)
+	if err == nil {
+		return x, y
+	}
+	return s.Last()
+}
+
+
+func (s *textScreen) Up(column, row int) (int, int, error) {
+
+	if column >= 0 && column < s.columns {
+		for y := clip.IntMin(row-1, s.rows-1) ; y >= 0 ; y-=1 {
+			if s.indices[y*s.columns + column] != -1 {
+				return column, y, nil
+			}
+		}
+	}
+	return column, row, noSuchField
+}
+
+func (s *textScreen) Down(column, row int) (int, int, error) {
+	if column >= 0 && column < s.columns {
+		for y := clip.IntMax(row+1, 0) ; y < s.rows ; y+=1 {
+			if s.indices[y*s.columns + column] != -1 {
+				return column, y, nil
+			}
+		}
+	}
+	return column, row, noSuchField
+}
+
+func (s *textScreen) Left(column, row int) (int, int, error) {
+
+	if row >= 0 && row < s.rows {
+		for x := clip.IntMin(column-1, s.columns-1) ; x >= 0 ; x-=1 {
+			if s.indices[row*s.columns + x] != -1 {
+				return row, x, nil
+			}
+		}
+	}
+	return column, row, noSuchField
+}
+
+func (s *textScreen) Right(column, row int) (int, int, error) {
+
+	if row >= 0 && row < s.rows {
+		for x := clip.IntMax(column+1, 0) ; x < s.columns ; x+=1 {
+			if s.indices[row*s.columns + x] != -1 {
+				return row, x, nil
+			}
+		}
+	}
+	return column, row, noSuchField
+}
+
 
 func (s *textScreen) UpWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = s.DigitIndex(column, row) {
-		row -= 1
-		if row < 0 {
-			row = s.rows-1
+	x, y, err := s.Up(column, row)
+	if err != nil {
+		x, y, err = s.Up(column, s.rows)
+		if err != nil {
+			panic(err)
 		}
 	}
-	return column, row
+	return x, y
 }
-
 
 func (s *textScreen) DownWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = s.DigitIndex(column, row) {
-		row += 1
-		if row >= s.rows {
-			row = 0
+	x, y, err := s.Down(column, row)
+	if err != nil {
+		x, y, err = s.Down(column, -1)
+		if err != nil {
+			panic(err)
 		}
 	}
-	return column, row
+	return x, y
 }
-
 
 func (s *textScreen) LeftWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = s.DigitIndex(column, row) {
-		column -= 1
-		if column < 0 {
-			column = s.columns-1
+	x, y, err := s.Left(column, row)
+	if err != nil {
+		x, y, err = s.Left(s.columns, row)
+		if err != nil {
+			panic(err)
 		}
 	}
-	return column, row
+	return x, y
 }
-
 
 func (s *textScreen) RightWrap(column, row int) (int, int) {
 
-	for index := -1; index == -1; index = s.DigitIndex(column, row) {
-		column += 1
-		if column >= s.columns {
-			column = 0
+	x, y, err := s.Right(column, row)
+	if err != nil {
+		x, y, err = s.Right(-1, row)
+		if err != nil {
+			panic(err)
 		}
 	}
-	return column, row
+	return x, y
 }
 

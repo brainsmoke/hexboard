@@ -34,6 +34,61 @@ func FloatBetween(f, min, max float64) float64 {
 	}
 }
 
+func IntMin(a, b int) int {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+
+func UintMin(a, b uint) uint {
+	if a < b {
+		return a
+	} else {
+		return b
+	}
+}
+
+
+func IntMax(a, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
+
+func UintMax(a, b uint) uint {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func IntBetween(f, min, max int) int {
+	if f < min {
+		return min
+	} else if f < max {
+		return f
+	} else {
+		return max
+	}
+}
+
+func UintBetween(f, min, max uint) uint {
+	if f < min {
+		return min
+	} else if f < max {
+		return f
+	} else {
+		return max
+	}
+}
+
 func IntToByte(i int) byte {
 
 	if i > 255 {

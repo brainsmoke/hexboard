@@ -7,6 +7,7 @@ import (
 )
 
 var serialDevice string
+var baudrate uint
 
 type Driver struct {
 	file *os.File
@@ -15,6 +16,7 @@ type Driver struct {
 
 func init() {
 
+	flag.UintVar(&baudrate, "baudrate", 1500000, "serial baudrate")
 	flag.StringVar(&serialDevice, "device", "/dev/ttyACM0", "serial output device")
 }
 
@@ -31,7 +33,7 @@ func GetDriver(size int) *Driver {
 	d.buf[size+3] = 0xf0
 
 	d.file, err = os.OpenFile(serialDevice, os.O_RDWR, 0)
-	SetBaudrate(d.file, 480000000)
+	SetBaudrate(d.file, baudrate)
 	SetBinary(d.file)
 
 	if err != nil {
