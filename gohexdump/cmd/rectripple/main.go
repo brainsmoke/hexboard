@@ -81,8 +81,9 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	cursor := screen.NewCursor(s)
-	filters := []screen.Filter { cursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.85) }
+	rippleCursor := screen.NewRippleCursor(.2, transform, s)
+//	rippleCursor := screen.NewRippleCursor(.5, nil, s)
+	filters := []screen.Filter { rippleCursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.85) }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
 
@@ -92,7 +93,7 @@ func main() {
 
 	var err error
 	x, y := 0,0
-	cursor.SetCursor(x, y)
+	rippleCursor.SetCursor(x, y)
 
 	loop: for {
 		select {
@@ -121,7 +122,7 @@ print(" (",key,") ")
 					s.Scroll(0,1)
 					x, y = 0, y
 				}
-				cursor.SetCursor(x, y)
+				rippleCursor.SetCursor(x, y)
 		}
 	}
 

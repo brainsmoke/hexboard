@@ -26,13 +26,20 @@ func NewRippleCursor(brightness float64, transform func(Vector2) Vector2, screen
     return r
 }
 
+func NewCursor(screen TextScreen) Cursor {
+	r := new(RippleCursor)
+	r.screen = screen
+	r.filter = nil
+    return r
+}
+
 func (r *RippleCursor) SetCursor(x, y int) {
 
 	r.mutex.Lock()
 	r.index = r.screen.DigitIndex(x, y)
 	r.blinkCountdown = 100
 	r.mutex.Unlock()
-	if r.index != -1 {
+	if r.filter != nil && r.index != -1 {
 		r.filter.SetRippleOrigin(r.filter.coords[r.index*16+3])
 	}
 }
@@ -56,10 +63,13 @@ func (r *RippleCursor) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 			}
 		}
 	}
-	if index != -1 && countdown == 0 {
-		r.filter.Ripple()
-	}
 
-	r.filter.Render(f, old, tick)
+	if r.filter != nil {
+		if index != -1 && countdown == 0 {
+			r.filter.Ripple()
+		}
+
+		r.filter.Render(f, old, tick)
+	}
 }
 
