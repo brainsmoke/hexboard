@@ -46,9 +46,13 @@ func (r *RippleCursor) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 	r.mutex.Unlock()
 
 	if index != -1 && countdown < 100 {
+		b := 1.
+		if countdown > 90 {
+			b -= float64(countdown-90)/20.
+		}
 		for i:=0; i<14; i++ {
-			if f.frame[index*16 + i] < 1 {
-				f.frame[index*16 + i] = 1
+			if f.frame[index*16 + i] < b {
+				f.frame[index*16 + i] = b
 			}
 		}
 	}
