@@ -362,7 +362,7 @@ func (s *textScreen) WriteRawAt(g []font.Glyph, column, row int) (int, int, erro
 		if err != nil {
 			break
 		}
-		index := s.DigitIndex(column, row)
+		index := s.DigitIndex(x, y)
 		s.staging[index].glyph = glyph
 		s.staging[index].style = s.style.Apply()
 		x, y, err = s.Next(x, y)
