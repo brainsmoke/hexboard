@@ -21,10 +21,10 @@ type RippleCursor struct {
 	brightness float64
 }
 
-func NewRippleCursor(cursorBrightness, rippleBrightness float64, transform func(Vector2) Vector2, screen TextScreen) Cursor {
+func NewRippleCursor(cursorBrightness, rippleBrightness float64, wave []float64, transform func(Vector2) Vector2, screen TextScreen) Cursor {
 	r := new(RippleCursor)
 	r.screen = screen
-	r.filter = NewRippleFilter(rippleBrightness, transform, screen)
+	r.filter = NewRippleFilter(rippleBrightness, wave, transform, screen)
 	r.brightness = math.Max(0, math.Min(1, cursorBrightness))
     return r
 }
