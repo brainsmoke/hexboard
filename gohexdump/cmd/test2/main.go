@@ -5,47 +5,61 @@ import (
 	"post6.net/gohexdump/internal/screen"
 	"post6.net/gohexdump/internal/font"
 	"post6.net/gohexdump/internal/drivers"
+	"post6.net/gohexdump/internal/util/keys"
 	"os"
 	"fmt"
-	"bufio"
 	"flag"
-//	"time"
 	"runtime/pprof"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
-const (
-	nop = iota
-	left
-	down
-	up
-	right
-	quit
-)
+func terminal(ch <-chan byte, s screen.TextScreen, cursor screen.Cursor) {
 
-func cmdHandler(file *os.File, events chan<- int) {
+	var err error
+	x, y := 62,9
+	cursor.SetCursor(x, y)
 
-	scanner := bufio.NewScanner(os.Stdin)
+	loop: for {
+		select {
+			case key, ok := <-ch:
+				if !ok {
+					break loop
+				}
+				switch key {
+					case keys.Enter:
+						x, y, err = s.Down(0, y)
+					case keys.Backspace:
 
-	for scanner.Scan() {
+						x, y, err = s.Previous(x, y)
 
-		switch scanner.Text() {
-		case "h":
-			events <- left
-		case "j":
-			events <- down
-		case "k":
-			events <- up
-		case "l":
-			events <- right
-		case "quit":
-			events <- quit
-			break
+//						if err == nil {
+//							s.WriteAt(" ", x, y)
+//						}
+//						err = nil
+
+					case keys.Up:
+						x, y, _ = s.Up(x, y)
+					case keys.Down:
+						x, y, _ = s.Down(x, y)
+					case keys.Left:
+						x, y, _ = s.Left(x, y)
+					case keys.Right:
+						x, y, _ = s.Right(x, y)
+					default:
+//						if key < 32 || key > 126 { print(" (",key,") ") }
+
+//						c := strings.ToUpper(string(key))
+//						x, y, err = s.WriteAt(c, x, y)
+						x, y, err = s.Next(x, y)
+				}
+				if err != nil {
+					s.Scroll(0,1)
+					x, y, err = 0, y, nil
+				}
+				cursor.SetCursor(x, y)
 		}
 	}
-
-	close(events)
 }
 
 func writeScreen(s screen.HexScreen) {
@@ -132,41 +146,24 @@ func main() {
 
 	multi, screenChan := screen.NewMultiScreen()
 
-	rippleCursor := screen.NewRippleCursor(1, .5, nil, nil, s)
-	filters := []screen.Filter { rippleCursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.85) }
+	cursor := screen.NewRippleCursor(1, .5, nil, nil, s)
+	filters := []screen.Filter { cursor, screen.DefaultGamma(), screen.NewAfterGlowFilter(.85) }
 
 	screenChan <- screen.NewFilterScreen(s, filters)
 
 	q := make(chan bool)
-	events := make(chan int)
+	ch := make(chan byte)
 
-	go cmdHandler(os.Stdin, events)
 
-	go screen.DisplayRoutine(drivers.GetDriver(s.SegmentCount()), multi, s, q)
+	go terminal(ch, s, cursor)
 
-	x, y := 62,9
-	rippleCursor.SetCursor(x, y)
+	go func(){
+	keys.Raw(os.Stdin, ch)
+	screenChan <- screen.NewExitScreen(.5)
+	}()
 
-	loop: for {
-		select {
-			case e := <-events:
-				switch e {
-					case quit:
-						break loop
-					case left:
-						x, y = s.LeftWrap(x, y)
-					case down:
-						x, y = s.DownWrap(x, y)
-					case up:
-						x, y = s.UpWrap(x, y)
-					case right:
-						x, y = s.RightWrap(x, y)
-				}
-				rippleCursor.SetCursor(x, y)
-		}
-	}
-
-	close(q)
+	screen.DisplayRoutine(drivers.GetDriver(s.SegmentCount()), multi, s, q)
+//	close(q)
 
 }
 
