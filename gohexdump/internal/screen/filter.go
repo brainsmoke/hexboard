@@ -20,7 +20,7 @@ func NewAfterGlowFilter(factor float64) Filter {
 
 func (s *afterGlowFilter) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 
-	for i := range f.frame {
+	for i := range old.frame {
 		fade := old.frame[i] * s.factor
 		if fade > f.frame[i] {
 			f.frame[i] = fade

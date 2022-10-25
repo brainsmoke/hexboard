@@ -25,7 +25,7 @@ type Output interface {
 func DisplayRoutine(out Output, s Screen, info ScreenInfo, quit <-chan bool) {
 
 	var counter, prev_counter uint64
-	var frames = []*FrameBuffer { NewFrameBuffer(info.SegmentCount()), NewFrameBuffer(info.SegmentCount()) }
+	var frames = []*FrameBuffer { NewFrameBuffer(info.DigitCount()), NewFrameBuffer(info.DigitCount()) }
 	cur, old := 0, 1
 
 	if !s.NextFrame(frames[cur], frames[old], counter) {

@@ -31,9 +31,12 @@ func (g *gammaFilter) Render(f *FrameBuffer, old *FrameBuffer, tick uint64) {
 
 	for i := range f.frame {
 		v := clip.FloatBetween(f.frame[i] * 255, 0, 255)
-        v_int := math.Floor(v)
-		v_rem := v - v_int
-		lo, hi := g.table[int(v_int)], g.table[int(v_int)+1]
-		f.frame[i] = lo + v_rem*(hi-lo)
+        v_floor := math.Floor(v)
+		v_rem := v - v_floor
+		v_int := uint(v_floor)
+		if v_int < 256 {
+			lo, hi := g.table[v_int], g.table[v_int+1]
+			f.frame[i] = lo + v_rem*(hi-lo)
+		}
 	}
 }

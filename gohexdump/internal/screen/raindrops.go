@@ -94,7 +94,7 @@ func NewRaindropFilter(screen TextScreen) Filter {
 	f := new(RaindropFilter)
 	f.drops = make([]*raindrop, len(columns))
 	f.ripple = NewRippleFilter(.1, symmetricTransform, screen)
-	f.buf = NewFrameBuffer(screen.SegmentCount())
+	f.buf = NewFrameBuffer(screen.DigitCount())
 	for i := range f.drops {
 		f.drops[i] = newRaindrop(columns[i], f.ripple, screen)
 	}
